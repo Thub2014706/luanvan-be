@@ -1,4 +1,6 @@
+const { typeSeatEnum } = require("../constants")
 const RoomModel = require("../models/RoomModel")
+const SeatModel = require("../models/SeatModel")
 
 const addRoom = async (req, res) => {
     const { name, numCol, numRow, type, theater } = req.body
@@ -16,6 +18,17 @@ const addRoom = async (req, res) => {
     }
     try {
         const data = await RoomModel.create(req.body)
+        
+        const promises = [];
+        for (let i = 1; i <= numRow; i++) {
+            for (let j = 1; j <= numCol; j++) {
+                promises.push(
+                    SeatModel.create({ row: i, col: j, type: typeSeatEnum[0], room: data._id })
+                );
+            }
+        }
+        await Promise.all(promises);
+
         res.status(200).json(data)
     } catch (error) {
         console.log(error)
@@ -46,6 +59,22 @@ const updateRoom = async (req, res) => {
     }
     try {
         const data = await RoomModel.findByIdAndUpdate(id, req.body, { new: true })
+
+        const promises = [];
+        const seats = await SeatModel.find({room: id, $or: [{col: {$gt: numCol}}, {row: {$gt: numRow}}]})
+        seats.map(async item => await SeatModel.findByIdAndDelete(item._id))
+        for (let i = 1; i <= numRow; i++) {
+            for (let j = 1; j <= numCol; j++) {
+                if (!(await SeatModel.findOne({row: i, col: j, room: id}))) {
+                    promises.push(
+                        SeatModel.create({ row: i, col: j, type: typeSeatEnum[0], room: data._id })
+                    );
+                }
+                // if (await SeatModel.find({row: i, col: j}))
+            }
+        }
+        await Promise.all(promises);
+
         res.status(200).json(data)
     } catch (error) {
         console.log(error)
