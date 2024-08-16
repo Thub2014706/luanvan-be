@@ -1,3 +1,4 @@
+const RoomModel = require("../models/RoomModel")
 const TheaterModel = require("../models/TheaterModel")
 
 const addTheater = async (req, res) => {
@@ -57,11 +58,16 @@ const updateTheater = async (req, res) => {
 const deleteTheater = async (req, res) => {
     const id = req.params.id
     try {
-        const data = await TheaterModel.findOneAndDelete({_id: id})
+        const existing = await RoomModel.find({theater: id})
+        await Promise.all(existing.map(async item => 
+            await RoomModel.findByIdAndDelete(item._id))
+        )
+        await TheaterModel.findOneAndDelete({_id: id})
         res.status(200).json({
             message: 'Xóa thành công'
         })
     } catch (error) {
+        console.log(error)
         res.status(500).json({
             message: "Đã có lỗi xảy ra",
         })
