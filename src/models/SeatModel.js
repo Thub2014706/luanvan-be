@@ -7,6 +7,9 @@ const SeatSchema = new mongoose.Schema({
     status: { type: Boolean, required: true, default: true },
     room: { type: mongoose.Schema.Types.ObjectId, ref: 'Room', required: true},
     isDelete: { type: Boolean, default: false },
+    bottom: { type: Number, default: 0 },
+    left: { type: Number, default: 0 },
+    right: { type: Number, default: 0 },
 }, {
     timestamps: true 
 });

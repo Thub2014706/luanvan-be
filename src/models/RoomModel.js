@@ -7,6 +7,7 @@ const RoomSchema = new mongoose.Schema({
     numCol: { type: Number, required: true },
     status: { type: Boolean, required: true, default: false },
     theater: { type: mongoose.Schema.Types.ObjectId, ref: 'Theater', required: true},
+    door: { type: Boolean, required: true, default: false },
 }, {
     timestamps: true 
 });

@@ -1,7 +1,7 @@
 const SeatModel = require("../models/SeatModel")
 
 const updateRow = async (req, res) => {
-    const {numRow, room, type, status} = req.body
+    const {numRow, room, type, status, bottom} = req.body
     
     try {
         const existing = await SeatModel.find({room, row: numRow})
@@ -10,7 +10,7 @@ const updateRow = async (req, res) => {
             promises.push(
                 SeatModel.findByIdAndUpdate(
                     item._id, 
-                    { row: numRow, col: item.col, type, status, room }, 
+                    { row: numRow, col: item.col, type, status, room, bottom }, 
                     { new: true }
                 )
             );
