@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken')
 const dotenv = require('dotenv');
+const { allAccess } = require('../constants');
 
 dotenv.config()
 
@@ -100,39 +101,6 @@ const userAdminAccuracy = (req, res, next) => {
     })
 }
 
-// người dùng shipper
-const userShipperAccuracy = (req, res, next) => {
-    const authorizationHeader = req.headers['authorization']
-    const token = authorizationHeader.split(' ')[1]
-
-    if (!authorizationHeader) {
-        return res.status(401).json({
-            message: 'Thiếu Headers'
-        })
-    }
-    if (!token) {
-        return res.status(401).json({
-            message: 'Thiếu token'
-        })
-    }
-
-    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, data) => {
-        if (err) {
-            console.error(err);
-            return res.status(403).json({ 
-                message: 'Token không hợp lệ' 
-            });
-        }
-        if (data.shipper === true) {
-            next()
-        } else {
-            res.status(403).json({ 
-                message: 'Không có quyền truy cập' 
-            });
-        }
-    })
-}
-
 // người dùng là admin hoạc đúng tài khoản
 const userOrAdminAccuracy = (req, res, next) => {
     const authorizationHeader = req.headers['authorization']
@@ -167,8 +135,8 @@ const userOrAdminAccuracy = (req, res, next) => {
     })
 }
 
-// người dùng là shipper hoạc đúng tài khoản
-const userOrShipperAccuracy = (req, res, next) => {
+// người dùng là admin hoạc đúng tài khoản
+const GenreAccuracy = (req, res, next) => {
     const authorizationHeader = req.headers['authorization']
     const token = authorizationHeader.split(' ')[1]
     const id = req.params.id
@@ -191,7 +159,7 @@ const userOrShipperAccuracy = (req, res, next) => {
                 message: 'Token không hợp lệ' 
             });
         }
-        if (data.shipper === true || data.id === id) {
+        if (data.role === 0 || data.access.find(item => item === allAccess[0])) {
             next()
         } else {
             res.status(403).json({ 
@@ -204,8 +172,7 @@ const userOrShipperAccuracy = (req, res, next) => {
 module.exports = { 
     userAccuracy, 
     userAdminAccuracy, 
-    userShipperAccuracy,
     UserIdAccuracy, 
     userOrAdminAccuracy,
-    userOrShipperAccuracy
+    GenreAccuracy
 }

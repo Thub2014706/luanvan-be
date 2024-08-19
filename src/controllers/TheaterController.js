@@ -4,7 +4,7 @@ const TheaterModel = require("../models/TheaterModel")
 const addTheater = async (req, res) => {
     const { name, address, province, district, ward } = req.body
 
-    const existing = await TheaterModel.findOne({ name: name })
+    const existing = await TheaterModel.findOne({ name: name, isDelete: false })
     if (!name || !address || !province || !district || !ward ) {
         return res.status(400).json({
             message: "Nhập đầy đủ thông tin"
@@ -33,6 +33,7 @@ const updateTheater = async (req, res) => {
     const existing = await TheaterModel.findOne({
         _id: { $ne: id },
         name: name,
+        isDelete: false
     });
     if (!name || !address || !province || !district || !ward ) {
         return res.status(400).json({
@@ -46,9 +47,9 @@ const updateTheater = async (req, res) => {
     }
     try {
         const data = await TheaterModel.findByIdAndUpdate(id, req.body, { new: true })
+        console.log(rooms)
         res.status(200).json(data)
     } catch (error) {
-        console.log(error)
         res.status(500).json({
             message: "Đã có lỗi xảy ra",
         })
@@ -58,11 +59,11 @@ const updateTheater = async (req, res) => {
 const deleteTheater = async (req, res) => {
     const id = req.params.id
     try {
-        const existing = await RoomModel.find({theater: id})
+        const existing = await RoomModel.find({theater: id, isDelete: false})
         await Promise.all(existing.map(async item => 
             await RoomModel.findByIdAndDelete(item._id))
         )
-        await TheaterModel.findOneAndDelete({_id: id})
+        await TheaterModel.findByIdAndUpdate({_id: id}, {isDelete: true}, {new: true})
         res.status(200).json({
             message: 'Xóa thành công'
         })
@@ -103,7 +104,7 @@ const detailTheater = async (req, res) => {
 const allTheater = async (req, res) => {
     const {search, number, show} = req.query
     try {
-        const all = await TheaterModel.find({}).sort({createdAt: -1})
+        const all = await TheaterModel.find({isDelete: false}).sort({createdAt: -1})
         const searchAll = all.filter(item => 
             [item.name, item.province, item.ward, item.district, item.address].some(any =>
                 any

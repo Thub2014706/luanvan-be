@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken')
 const UserModel = require('../models/UserModel')
 const bcrypt = require('bcrypt')
+const StaffModel = require('../models/StaffModel')
 
 const accuracyAccessToken = (data) => {
     return jwt.sign(data, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '3h' })
@@ -12,12 +13,12 @@ const accuracyRefreshToken = (data) => {
 
 let refreshTokens = []
 
-const login = async (req, res) => {
-    const { info, password, frontendType } = req.body
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,20}$/;
-    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+const login = async (req, res, model) => {
+    const { info, password } = req.body
+    // const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,20}$/;
+    // const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
-    const existingUser = await UserModel.findOne({
+    const existingUser = await model.findOne({
         $or: [{username: info}, {phone: info}, {email: info} ]
     })
 
@@ -39,22 +40,24 @@ const login = async (req, res) => {
         })
     }
 
-    if (frontendType === 'admin' && ![0, 1].includes(existingUser.role)) {
-        return res.status(403).json({
-            message: "Truy cập bị từ chối"
-        });
-    } 
-    // else if (frontendType === 'customer' && existingUser.role !== 'customer') {
+    if (!existingUser.status) {
+        return res.status(400).json({
+            message: "Tài khoản của bạn đã bị khóa. Vui lòng liên hệ người quản trị!"
+        })
+    }
+
+    // if (frontendType === 'admin' && ![0, 1].includes(existingUser.role)) {
     //     return res.status(403).json({
     //         message: "Truy cập bị từ chối"
     //     });
-    // }
+    // } 
 
     try {
         const data = {
             id: existingUser._id, 
             username: existingUser.username,
-            role: existingUser.role
+            role: existingUser.role,
+            access: existingUser.access
         }
         const accessToken = accuracyAccessToken(data)
         const refreshToken = accuracyRefreshToken(data)
@@ -75,6 +78,11 @@ const login = async (req, res) => {
         })
     }
 }
+
+const loginStaff = (req, res) => login(req, res, StaffModel)
+
+const loginUser = (req, res) => login(req, res, UserModel)
+
 
 const refreshToken = async (req, res) => {
     try {
@@ -97,7 +105,8 @@ const refreshToken = async (req, res) => {
             const data = {
                 id: user.id, 
                 username: user.username,
-                role: user.role
+                role: user.role,
+                access: user.access
             }
             const newAccessToken = accuracyAccessToken(data)
             const newRefreshToken = accuracyRefreshToken(data)
@@ -129,7 +138,8 @@ const logout = async (req, res) => {
 }
 
 module.exports = {
-    login, 
+    loginStaff,
+    loginUser,
     refreshToken,
     logout
 }

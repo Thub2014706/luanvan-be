@@ -8,6 +8,7 @@ const RoomSchema = new mongoose.Schema({
     status: { type: Boolean, required: true, default: false },
     theater: { type: mongoose.Schema.Types.ObjectId, ref: 'Theater', required: true},
     door: { type: Boolean, required: true, default: false },
+    isDelete: { type: Boolean, required: true, default: false },
 }, {
     timestamps: true 
 });

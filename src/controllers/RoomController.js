@@ -5,7 +5,7 @@ const SeatModel = require("../models/SeatModel")
 const addRoom = async (req, res) => {
     const { name, numCol, numRow, type, theater } = req.body
 
-    const existing = await RoomModel.findOne({ name: name, theater: theater })
+    const existing = await RoomModel.findOne({ name: name, theater: theater, isDelete: false })
     if (!name || !numCol || !numRow || !type ) {
         return res.status(400).json({
             message: "Nhập đầy đủ thông tin"
@@ -87,7 +87,7 @@ const updateRoom = async (req, res) => {
 const deleteRoom = async (req, res) => {
     const id = req.params.id
     try {
-        const data = await RoomModel.findOneAndDelete({_id: id})
+        await RoomModel.findByIdAndUpdate(id, {isDelete: true})
         res.status(200).json({
             message: 'Xóa thành công'
         })
@@ -161,7 +161,7 @@ const detailRoom = async (req, res) => {
 const allRoom = async (req, res) => {
     const {idCinema} = req.query
     try {
-        const data = await RoomModel.find({theater: idCinema}).sort({createdAt: -1})
+        const data = await RoomModel.find({theater: idCinema, isDelete: false}).sort({createdAt: -1})
         res.status(200).json(data)
     } catch (error) {
         res.status(500).json({

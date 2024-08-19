@@ -8,6 +8,7 @@ const TheaterSchema = new mongoose.Schema({
     ward: { type: String, required: true },
     // map: { type: String, required: true },
     status: { type: Boolean, required: true, default: false },
+    isDelete: { type: Boolean, required: true, default: false },
 }, {
     timestamps: true 
 });

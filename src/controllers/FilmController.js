@@ -85,8 +85,9 @@ const allFilm = async (req, res) => {
         const all = await FilmModel.find({}).sort({createdAt: -1})
         const searchAll = await Promise.all(
             all.map(async (item) => {
-                const genres = await Promise.all(item.genre.map(genre => GenreModel.findById(genre)))
-                const searchStrings = [item.name, ...genres.map(genre => genre.name), item.nation];
+                // const genres = await Promise.all(item.genre.map(genre => GenreModel.findById(genre)))
+                // , ...genres.map(genre => genre.name)
+                const searchStrings = [item.name, item.nation];
 
                 const matchesSearch = searchStrings.some(any => 
                     any

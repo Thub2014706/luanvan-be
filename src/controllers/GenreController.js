@@ -1,3 +1,4 @@
+const FilmModel = require("../models/FilmModel")
 const GenreModel = require("../models/GenreModel")
 
 const addGenre = async (req, res) => {
@@ -59,7 +60,11 @@ const updateGenre = async (req, res) => {
 const deleteGenre = async (req, res) => {
     const id = req.params.id
     try {
-        const data = await GenreModel.findOneAndDelete({_id: id})
+        await FilmModel.findOneAndUpdate({ genre: { $in: [id] } }, { $pull: { genre: id } }, {new: true})
+        // await Promise.all(data.map(async item => 
+        //     await FilmModel.findByIdAndDelete(item._id))
+        // )
+        await GenreModel.findOneAndDelete({_id: id})
         res.status(200).json({
             message: 'Xóa thành công'
         })

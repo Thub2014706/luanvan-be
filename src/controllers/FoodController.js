@@ -126,7 +126,7 @@ const deleteFood = async (req, res) => {
 
 const listFood = async (req, res) => {
     try {
-        const data = await FoodModel.find({})
+        const data = await FoodModel.find({status: true})
         res.status(200).json(data)
     } catch (error) {
         res.status(500).json({

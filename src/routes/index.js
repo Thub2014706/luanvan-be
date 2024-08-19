@@ -9,6 +9,7 @@ const discountRouter = require('./DiscountRouter')
 const theaterRouter = require('./TheaterRouter')
 const roomRouter = require('./RoomRouter')
 const seatRouter = require('./SeatRouter')
+const staffRouter = require('./StaffRouter')
 
 const routes = (app) => {
     app.use('/api/user/', userRouter)
@@ -22,6 +23,7 @@ const routes = (app) => {
     app.use('/api/theater/', theaterRouter)
     app.use('/api/room/', roomRouter)
     app.use('/api/seat/', seatRouter)
+    app.use('/api/staff/', staffRouter)
 
 }
 
