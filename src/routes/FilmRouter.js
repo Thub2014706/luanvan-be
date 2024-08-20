@@ -4,11 +4,11 @@ const middlewares = require('../controllers/MiddlewareController');
 const upload = require('./Upload');
 const router = express.Router()
 
-router.post('/', upload.single("image"), filmController.addFilm);
+router.post('/', middlewares.filmAccuracy, upload.single("image"), filmController.addFilm);
 router.get('/image/:name', filmController.getImage)
-router.put('/update/:id', upload.single("image"), filmController.updateFilm);
+router.put('/update/:id', middlewares.filmAccuracy, upload.single("image"), filmController.updateFilm);
 router.get('/:id', filmController.detailFilm);
 router.get('/', filmController.allFilm);
-router.patch('/status/:id', filmController.statusFilm);
+router.patch('/status/:id', middlewares.filmAccuracy, filmController.statusFilm);
 
 module.exports = router

@@ -1,3 +1,4 @@
+const FilmModel = require("../models/FilmModel");
 const PerformerModel = require("../models/PerformerModel")
 
 const addPerformer = async (req, res) => {
@@ -100,7 +101,9 @@ const allPerformer = async (req, res) => {
 const deletePerformer = async (req, res) => {
     const id = req.params.id
     try {
-        const data = await PerformerModel.findOneAndDelete({_id: id})
+        await FilmModel.findOneAndUpdate({ performer: { $in: [id] } }, { $pull: { performer: id } }, {new: true})
+
+        await PerformerModel.findOneAndDelete({_id: id})
         res.status(200).json({
             message: 'Xóa thành công'
         })

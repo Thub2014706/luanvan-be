@@ -61,28 +61,12 @@ const deleteGenre = async (req, res) => {
     const id = req.params.id
     try {
         await FilmModel.findOneAndUpdate({ genre: { $in: [id] } }, { $pull: { genre: id } }, {new: true})
-        // await Promise.all(data.map(async item => 
-        //     await FilmModel.findByIdAndDelete(item._id))
-        // )
+
         await GenreModel.findOneAndDelete({_id: id})
         res.status(200).json({
             message: 'Xóa thành công'
         })
     } catch (error) {
-        res.status(500).json({
-            message: "Đã có lỗi xảy ra",
-        })
-    }
-}
-
-const statusGenre = async (req, res) => {
-    const id = req.params.id
-    try {
-        const existing = await GenreModel.findById(id);
-        const data = await GenreModel.findByIdAndUpdate(id, {status: !existing.status}, { new: true })
-        res.status(200).json(data)
-    } catch (error) {
-        // console.log(error)
         res.status(500).json({
             message: "Đã có lỗi xảy ra",
         })
@@ -131,7 +115,7 @@ const allGenre = async (req, res) => {
 
 const listGenre = async (req, res) => {
     try {
-        const data = await GenreModel.find({status: true}).sort({createdAt: -1});
+        const data = await GenreModel.find().sort({createdAt: -1});
         res.status(200).json(data)
     } catch (error) {
         console.log(error)
@@ -145,7 +129,6 @@ module.exports = {
     addGenre,
     updateGenre,
     deleteGenre,
-    statusGenre,
     detailGenre,
     allGenre,
     listGenre

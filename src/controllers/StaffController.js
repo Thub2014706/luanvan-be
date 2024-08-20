@@ -80,7 +80,8 @@ const allStaff = async (req, res) => {
         const totalPages = Math.ceil(searchAll.length / parseInt(show))
         res.status(200).json({
             data: newAll,
-            length: totalPages
+            sumPage: totalPages,
+            length: searchAll.length
         })
     } catch (error) {
         res.status(500).json({

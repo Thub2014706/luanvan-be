@@ -69,37 +69,37 @@ const UserIdAccuracy = (req, res, next) => {
 }
 
 // người dùng admin
-const userAdminAccuracy = (req, res, next) => {
-    const authorizationHeader = req.headers['authorization']
-    const token = authorizationHeader.split(' ')[1]
+// const userAdminAccuracy = (req, res, next) => {
+//     const authorizationHeader = req.headers['authorization']
+//     const token = authorizationHeader.split(' ')[1]
 
-    if (!authorizationHeader) {
-        return res.status(401).json({
-            message: 'Thiếu Headers'
-        })
-    }
-    if (!token) {
-        return res.status(401).json({
-            message: 'Thiếu token'
-        })
-    }
+//     if (!authorizationHeader) {
+//         return res.status(401).json({
+//             message: 'Thiếu Headers'
+//         })
+//     }
+//     if (!token) {
+//         return res.status(401).json({
+//             message: 'Thiếu token'
+//         })
+//     }
 
-    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, data) => {
-        if (err) {
-            console.error(err);
-            return res.status(403).json({ 
-                message: 'Token không hợp lệ' 
-            });
-        }
-        if (data.role === 0) {
-            next()
-        } else {
-            res.status(403).json({ 
-                message: 'Không có quyền truy cập' 
-            });
-        }
-    })
-}
+//     jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, data) => {
+//         if (err) {
+//             console.error(err);
+//             return res.status(403).json({ 
+//                 message: 'Token không hợp lệ' 
+//             });
+//         }
+//         if (data.role === 0) {
+//             next()
+//         } else {
+//             res.status(403).json({ 
+//                 message: 'Không có quyền truy cập' 
+//             });
+//         }
+//     })
+// }
 
 // người dùng là admin hoạc đúng tài khoản
 const userOrAdminAccuracy = (req, res, next) => {
@@ -135,11 +135,11 @@ const userOrAdminAccuracy = (req, res, next) => {
     })
 }
 
-// người dùng là admin hoạc đúng tài khoản
-const GenreAccuracy = (req, res, next) => {
+//tong quat
+const accuracy = (acc) => (req, res, next) => {
     const authorizationHeader = req.headers['authorization']
     const token = authorizationHeader.split(' ')[1]
-    const id = req.params.id
+    // const id = req.params.id
 
     if (!authorizationHeader) {
         return res.status(401).json({
@@ -159,7 +159,7 @@ const GenreAccuracy = (req, res, next) => {
                 message: 'Token không hợp lệ' 
             });
         }
-        if (data.role === 0 || data.access.find(item => item === allAccess[0])) {
+        if (data.role === 0 || data.access.includes(acc)) {
             next()
         } else {
             res.status(403).json({ 
@@ -169,10 +169,49 @@ const GenreAccuracy = (req, res, next) => {
     })
 }
 
+// người dùng là admin hoặc genre
+const genreAccuracy = accuracy(allAccess[0])
+
+// người dùng là admin hoặc film
+const filmAccuracy = accuracy(allAccess[1])
+
+// người dùng là admin hoặc director
+const directorAccuracy = accuracy(allAccess[2])
+
+// người dùng là admin hoặc performer
+const performerAccuracy = accuracy(allAccess[3])
+
+// người dùng là admin hoặc food
+const foodAccuracy = accuracy(allAccess[4])
+
+// người dùng là admin hoặc combo
+const comboAccuracy = accuracy(allAccess[5])
+
+// người dùng là admin hoặc discount
+const discountAccuracy = accuracy(allAccess[6])
+
+// người dùng là admin hoặc user
+const userAdminAccuracy = accuracy(allAccess[7])
+
+// người dùng là admin hoặc theater
+const theaterAccuracy = accuracy(allAccess[8])
+
+// người dùng là admin hoặc staff
+const staffAccuracy = accuracy(allAccess[9])
+
+
 module.exports = { 
     userAccuracy, 
     userAdminAccuracy, 
     UserIdAccuracy, 
     userOrAdminAccuracy,
-    GenreAccuracy
+    genreAccuracy,
+    filmAccuracy,
+    directorAccuracy,
+    performerAccuracy,
+    foodAccuracy,
+    comboAccuracy,
+    discountAccuracy,
+    theaterAccuracy,
+    staffAccuracy
 }

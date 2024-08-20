@@ -80,7 +80,8 @@ const allUser = async (req, res) => {
         const totalPages = Math.ceil(searchAll.length / parseInt(show))
         res.status(200).json({
             data: newAll,
-            length: totalPages
+            sumPage: totalPages,
+            length: searchAll.length
         })
     } catch (error) {
         res.status(500).json({
@@ -89,7 +90,22 @@ const allUser = async (req, res) => {
     }
 }
 
+const statusUser = async (req, res) => {
+    const id = req.params.id
+    try {
+        const existing = await UserModel.findById(id);
+        const data = await UserModel.findByIdAndUpdate(id, {status: !existing.status}, { new: true })
+        res.status(200).json(data)
+    } catch (error) {
+        // console.log(error)
+        res.status(500).json({
+            message: "Đã có lỗi xảy ra",
+        })
+    }
+}
+
 module.exports = {
     register,
-    allUser
+    allUser,
+    statusUser
 }

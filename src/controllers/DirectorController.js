@@ -1,4 +1,5 @@
-const DirectorModel = require("../models/DirectorModel")
+const DirectorModel = require("../models/DirectorModel");
+const FilmModel = require("../models/FilmModel");
 
 const addDirector = async (req, res) => {
     const {name, birth, description} = req.body
@@ -100,7 +101,8 @@ const allDirector = async (req, res) => {
 const deleteDirector = async (req, res) => {
     const id = req.params.id
     try {
-        const data = await DirectorModel.findOneAndDelete({_id: id})
+        await FilmModel.findOneAndUpdate({ director: { $in: [id] } }, { $pull: { director: id } }, {new: true})
+        await DirectorModel.findOneAndDelete({_id: id})
         res.status(200).json({
             message: 'Xóa thành công'
         })

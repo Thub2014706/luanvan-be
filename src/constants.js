@@ -13,8 +13,8 @@ const allAccess = {
     5: 'Combo',
     6: 'Mã khuyến mãi',
     7: 'Người dùng',
-    8: 'Nhân viên',
-    9: 'Rạp phim'
+    8: 'Rạp phim',
+    9: 'Nhân viên',
 }
 
 module.exports = {

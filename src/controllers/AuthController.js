@@ -19,7 +19,7 @@ const login = async (req, res, model) => {
     // const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
     const existingUser = await model.findOne({
-        $or: [{username: info}, {phone: info}, {email: info} ]
+        $or: [{username: info}, {phone: info}, {email: info} ], isDelete: false
     })
 
     if (!info || !password) {
