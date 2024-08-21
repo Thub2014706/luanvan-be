@@ -15,9 +15,18 @@ const allAccess = {
     7: 'Người dùng',
     8: 'Rạp phim',
     9: 'Nhân viên',
+    10: 'Giá vé',
+    11: 'Lịch chiếu'
+}
+
+const typeSchedule = {
+    0: 'Đã chiếu',
+    1: 'Đang chiếu',
+    2: 'Sắp chiếu'
 }
 
 module.exports = {
     typeSeatEnum,
-    allAccess
+    allAccess,
+    typeSchedule
 };
