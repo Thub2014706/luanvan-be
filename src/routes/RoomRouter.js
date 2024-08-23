@@ -9,5 +9,7 @@ router.get('/detail/:id', roomController.detailRoom);
 router.get('/', roomController.allRoom);
 router.patch('/status/:id', middlewares.theaterAccuracy, roomController.statusRoom);
 router.patch('/delete/:id', middlewares.theaterAccuracy, roomController.deleteRoom);
+router.get('/list-by-theater/:id', roomController.listRoomByTheater);
+router.get('/filter-by-theater', roomController.filterRoomByTheater);
 
 module.exports = router

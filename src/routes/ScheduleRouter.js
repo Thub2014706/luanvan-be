@@ -6,5 +6,6 @@ const router = express.Router()
 router.post('/', middlewares.scheduleAccuracy, scheduleController.addSchedule);
 router.get('/', scheduleController.allSchedule);
 router.put('/update/:id', middlewares.scheduleAccuracy, scheduleController.updateSchedule);
+router.get('/list', scheduleController.listSchedule);
 
 module.exports = router

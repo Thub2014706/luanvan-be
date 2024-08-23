@@ -11,6 +11,7 @@ const roomRouter = require('./RoomRouter')
 const seatRouter = require('./SeatRouter')
 const staffRouter = require('./StaffRouter')
 const scheduleRouter = require('./ScheduleRouter')
+const showTimeRouter = require('./ShowTimeRouter')
 
 const routes = (app) => {
     app.use('/api/user/', userRouter)
@@ -26,6 +27,7 @@ const routes = (app) => {
     app.use('/api/seat/', seatRouter)
     app.use('/api/staff/', staffRouter)
     app.use('/api/schedule/', scheduleRouter)
+    app.use('/api/showtime/', showTimeRouter)
 
 }
 

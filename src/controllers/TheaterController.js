@@ -135,11 +135,23 @@ const allTheater = async (req, res) => {
     }
 }
 
+const listTheater = async (req, res) => {
+    try {
+        const data = await TheaterModel.find({isDelete: false, status: true});
+        res.status(200).json(data)
+    } catch (error) {
+        res.status(500).json({
+            message: "Đã có lỗi xảy ra",
+        })
+    }
+}
+
 module.exports = {
     addTheater,
     updateTheater,
     deleteTheater,
     statusTheater,
     detailTheater,
-    allTheater
+    allTheater,
+    listTheater
 }

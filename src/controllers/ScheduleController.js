@@ -1,27 +1,24 @@
 const { typeSchedule } = require("../constants")
 const FilmModel = require("../models/FilmModel")
 const ScheduleModel = require("../models/ScheduleModel")
-// const cron = require('node-cron');
-
-// cron.schedule( *, () => {
-//     console.log('Đến ngày cập nhật dữ liệu!');
-// });
+const cron = require('node-cron');
 
 const addSchedule = async (req, res) => {
     const { film, startDate, endDate } = req.body
+    console.log(new Date(endDate).getTime(), new Date().setUTCHours(0, 0, 0, 0))
     if (endDate < startDate) {
         return res.status(400).json({
             message: "Ngày kết thúc không thể sớm hơn ngày bắt đầu"
         })
     }
 
-    if (new Date(startDate) < new Date().setHours(0, 0, 0, 0)) {
+    if (new Date(startDate) < new Date().setUTCHours(0, 0, 0, 0)) {
         return res.status(400).json({
             message: "Ngày bắt đầu không thể sớm hơn hôm nay"
         });
     }
     
-    if (new Date(endDate).getTime() < new Date().setHours(0, 0, 0, 0)) {
+    if (new Date(endDate).getTime() < new Date().setUTCHours(0, 0, 0, 0)) {
         return res.status(400).json({
             message: "Ngày kết thúc không thể sớm hơn hôm nay"
         });
@@ -29,12 +26,12 @@ const addSchedule = async (req, res) => {
     
     try {
         let type
-        if (new Date(startDate).getTime() > new Date().setHours(0, 0, 0, 0)) {
+        if (new Date(startDate).getTime() > new Date().setUTCHours(0, 0, 0, 0)) {
             type = typeSchedule[2]
         }
         if (
-            new Date(startDate).getTime() <= new Date().setHours(0, 0, 0, 0) 
-            && new Date(endStart).getTime() >= new Date().setHours(0, 0, 0, 0)
+            new Date(startDate).getTime() <= new Date().setUTCHours(0, 0, 0, 0) 
+            && new Date(endDate).getTime() >= new Date().setUTCHours(0, 0, 0, 0)
         ) {
             type = typeSchedule[1]
         }
@@ -132,9 +129,72 @@ const detailSchedule = async (req, res) => {
     }
 }
 
+const listSchedule = async (req, res) => {
+    try {
+        const schedules = await ScheduleModel.find({$or: [{type: typeSchedule[1]} , {type: typeSchedule[2]}]})
+        // const data
+        const data = await Promise.all(schedules.map(async item => {
+            const film = await FilmModel.findById(item.film)
+            return {
+                schedule: item,
+                nameFilm: film.name
+            }
+        }))
+        res.status(200).json(data)
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({
+            message: "Đã có lỗi xảy ra",
+        })
+    }
+}
+
+// const deleteSchedule = async (req, res) => {
+//     const id = req.params.id
+//     try {
+//         const existing = await ScheduleModel.findById(id)
+//         if (existing.role === 0) {
+//             res.status(400).json({
+//                 message: 'Không thể xóa người dùng Admin'
+//             })
+//         } else {
+//             await StaffModel.findByIdAndUpdate({_id: id}, {isDelete: true}, {new: true})
+//             res.status(200).json({
+//                 message: 'Xóa thành công'
+//             })
+//         }
+//     } catch (error) {
+//         console.log(error)
+//         res.status(500).json({
+//             message: "Đã có lỗi xảy ra",
+//         })
+//     }
+// }
+
+cron.schedule(`0 0 0 * * *`, async () => {
+    try {
+        const data1 = await ScheduleModel.find({type: typeSchedule[2]})
+        await Promise.all(data1.map(async item => {
+            if (item.startDate.setUTCHours(0, 0, 0, 0) === new Date().setUTCHours(0, 0, 0, 0)) {
+                await ScheduleModel.findByIdAndUpdate(item._id, {type: typeSchedule[1]}, {new: true})
+            }
+        }))
+        const data2 = await ScheduleModel.find({type: typeSchedule[1]})
+        await Promise.all(data2.map(async item => {
+            if (item.endDate.setUTCHours(0, 0, 0, 0) > new Date().setUTCHours(0, 0, 0, 0)) {
+                await ScheduleModel.findByIdAndUpdate(item._id, {type: typeSchedule[0]}, {new: true})
+            }
+        }))    
+        console.log(data1, data2)  
+    } catch (error) {
+        console.log(error)
+    }
+})
+
 module.exports = {
     addSchedule,
     updateSchedule,
     allSchedule,
-    detailSchedule
+    detailSchedule,
+    listSchedule
 }

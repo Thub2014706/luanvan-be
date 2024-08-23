@@ -170,6 +170,44 @@ const allRoom = async (req, res) => {
     }
 }
 
+const listRoomByTheater = async (req, res) => {
+    const id = req.params.id
+    try {
+        const data = await RoomModel.find({isDelete: false, status: true, theater: id})
+        res.status(200).json(data)
+    } catch (error) {
+        console.log(id, error)
+        res.status(500).json({
+            message: "Đã có lỗi xảy ra",
+        })
+    }
+}
+
+const filterRoomByTheater = async (req, res) => {
+    const {room, theater} = req.query
+    try {
+        const all = await RoomModel.find({isDelete: false, status: true})
+        const array = all.map(item => {
+            let bool = true
+            if (theater) {
+                bool = bool && String(item.theater).trim() === theater
+            }
+            if (room) {
+                bool = bool && String(item._id).trim() === room
+            }
+            return bool ? item : null
+        })
+        const data = array.filter(item => item !== null)
+        console.log(all)
+        res.status(200).json(data)
+    } catch (error) {
+        console.log(id, error)
+        res.status(500).json({
+            message: "Đã có lỗi xảy ra",
+        })
+    }
+}
+
 module.exports = {
     addRoom,
     updateRoom,
@@ -177,5 +215,7 @@ module.exports = {
     statusRoom,
     detailRoom,
     allRoom,
-    allRoom
+    allRoom,
+    listRoomByTheater,
+    filterRoomByTheater
 }

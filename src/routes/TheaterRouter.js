@@ -9,5 +9,6 @@ router.get('/detail/:id', theaterController.detailTheater);
 router.get('/', theaterController.allTheater);
 router.patch('/status/:id', middlewares.theaterAccuracy, theaterController.statusTheater);
 router.patch('/delete/:id', middlewares.theaterAccuracy, theaterController.deleteTheater);
+router.get('/list', theaterController.listTheater);
 
 module.exports = router

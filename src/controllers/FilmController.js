@@ -144,7 +144,7 @@ const listFilm = async (req, res) => {
         let data = []
         await Promise.all(existing.map(async item => {
             const schedule = await ScheduleModel.findOne({film: item._id})
-            if (schedule === null || (new Date(schedule.endDate).getTime() < new Date().setHours(0, 0, 0, 0))) {
+            if (schedule === null || (new Date(schedule.endDate).getTime() < new Date().setUTCHours(0, 0, 0, 0))) {
                 data.push(item);
             }
             // console.log(new Date(schedule.endDate).getTime(), Date.now())
