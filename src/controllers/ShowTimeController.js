@@ -11,7 +11,7 @@ const addShowTime = async (req, res) => {
     try {
         const filmFind = await FilmModel.findById(film)
         let type
-        if (new Date(filmFind.releaseDate) > new Date().setUTCHours(0, 0, 0, 0)) {
+        if (new Date(filmFind.releaseDate) > new Date(date).setUTCHours(0, 0, 0, 0)) {
             type = typeShowTime[0]
         } else {
             type = typeShowTime[1]
@@ -19,69 +19,32 @@ const addShowTime = async (req, res) => {
         const data = await ShowTimeModel.create({...req.body, type, status: typeSchedule[2]})
         res.status(200).json(data)
     } catch (error) {
-        console.log(error, filmFind)
+        console.log(error)
         res.status(500).json({
             message: "Đã có lỗi xảy ra",
         })
     }
 }
 
-// const allShowTime = async (req, res) => {
-//     const { theater, room, date } = req.query
-//     try {
-//         const all = await ShowTimeModel.find({isDelete: false, theater, room, date})
-
-//         res.status(200).json(all)
-//     } catch (error) {
-//         console.log(error)
-//         res.status(500).json({
-//             message: "Đã có lỗi xảy ra",
-//         })
-//     }
-// }
-
-// const allShowTime = async (req, res) => {
-//     const { theater, room, date } = req.query
-//     try {
-//         const all = await ShowTimeModel.find({isDelete: false})
-//         const array = all.map(item => {
-//             let bool = true
-//             if (theater) {               
-//                 bool = bool && String(item.theater).trim() === theater
-//             }
-//             if (room) {
-//                 bool = bool && String(item.room).trim() === room
-//             }
-//             if (date) {
-//                 bool = bool && moment(item.date).format('YYYY-MM-DD') === date
-//             }
-//             return bool ? item : null
-//         })
-//         const data = array.filter(item => item !== null)
-//         console.log(array )
-//         res.status(200).json(data)
-//     } catch (error) {
-//         console.log(error)
-//         res.status(500).json({
-//             message: "Đã có lỗi xảy ra",
-//         })
-//     }
-// }
-
-// const allShowTime = async (req, res) => {
-//     const { theater, room, date } = req.query
-//     let data
-//     try {
-//         if (theater) {
-//             data = await fin
-//         }
-//     } catch (error) {
-//         console.log(error)
-//         res.status(500).json({
-//             message: "Đã có lỗi xảy ra",
-//         })
-//     }
-// }
+const detailShowTimeByRoom = async (req, res) => {
+    const { theater, room, date } = req.query
+    try {
+        const data = await ShowTimeModel.find({isDelete: false, theater, room, date})
+        let big = [] 
+        data.map(item => {
+            big.push({
+                timeStart: item.timeStart,
+                timeEnd: item.timeEnd
+            }) 
+        })
+        res.status(200).json(big)
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({
+            message: "Đã có lỗi xảy ra",
+        })
+    }
+}
 
 const allShowTime = async (req, res) => {
     const { theater, room, date } = req.query
@@ -90,23 +53,30 @@ const allShowTime = async (req, res) => {
         if (theater) {
             const theaterItem = await TheaterModel.findOne({ _id: theater, isDelete: false, status: true });
             if (room) {
-                const roomItem = await RoomModel.findOne({_id: room._id, isDelete: false, status: true})
+                const roomItem = await RoomModel.findOne({_id: room, isDelete: false, status: true})
                 const showTime = await ShowTimeModel.find({isDelete: false, theater, room: roomItem._id, date})
                 dataBig.push({
-                    room: roomItem,
-                    shoeTime: showTime
+                    theater: theaterItem,
+                    rooms: [{
+                        room: roomItem,
+                        showTimes: showTime
+                    }]
                 })
             } else {
                 const rooms = await RoomModel.find({theater: theaterItem._id, isDelete: false, status: true})
-                dataBig = await Promise.all(
+                let data = await Promise.all(
                     rooms.map(async mini => {
                         const showTime = await ShowTimeModel.find({isDelete: false, theater, room: mini._id, date})
-                        return {
+                        return ({
                             room: mini,
-                            showTime: showTime
-                        }
+                            showTimes: showTime
+                        })
                     })
                 )
+                dataBig.push({
+                    theater: theaterItem,
+                    rooms: data
+                })
             }
         } else {
             const theaters = await TheaterModel.find({isDelete: false, status: true})
@@ -118,21 +88,20 @@ const allShowTime = async (req, res) => {
                             const showTime = await ShowTimeModel.find({isDelete: false, theater, theater: item._id, room: mini._id, date})
                             return {
                                 room: mini,
-                                showTime: showTime
+                                showTimes: showTime
                             }
                         })
                     )
+                    return {
+                        theater: item,
+                        rooms: roomsData
+                    }
                 })
             )
-            return {
-                theater: item,
-                rooms: roomsData
-            }
         }
-        // const all = await ShowTimeModel.find({isDelete: false, theater, room, date})
         res.status(200).json(dataBig.flat())
     } catch (error) {
-        console.log(error)
+        console.log(error, theater, room)
         res.status(500).json({
             message: "Đã có lỗi xảy ra",
         })
@@ -141,5 +110,6 @@ const allShowTime = async (req, res) => {
 
 module.exports = {
     addShowTime,
-    allShowTime
+    allShowTime,
+    detailShowTimeByRoom
 }

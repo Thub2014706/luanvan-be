@@ -5,7 +5,7 @@ const cron = require('node-cron');
 
 const addSchedule = async (req, res) => {
     const { film, startDate, endDate } = req.body
-    console.log(new Date(endDate).getTime(), new Date().setUTCHours(0, 0, 0, 0))
+    console.log(new Date(startDate).getTime(), new Date().setUTCHours(0, 0, 0, 0))
     if (endDate < startDate) {
         return res.status(400).json({
             message: "Ngày kết thúc không thể sớm hơn ngày bắt đầu"
@@ -130,8 +130,12 @@ const detailSchedule = async (req, res) => {
 }
 
 const listSchedule = async (req, res) => {
+    const {endDate} = req.query
     try {
-        const schedules = await ScheduleModel.find({$or: [{type: typeSchedule[1]} , {type: typeSchedule[2]}]})
+        const schedules = await ScheduleModel.find({
+            $or: [{type: typeSchedule[1]} , {type: typeSchedule[2]}], 
+            endDate: { $gte: new Date(endDate) },
+        })
         // const data
         const data = await Promise.all(schedules.map(async item => {
             const film = await FilmModel.findById(item.film)
@@ -140,6 +144,7 @@ const listSchedule = async (req, res) => {
                 nameFilm: film.name
             }
         }))
+        // console.log((new Date().setUTCHours(0, 0, 0, 0)))
         res.status(200).json(data)
     } catch (error) {
         console.log(error)
@@ -181,7 +186,7 @@ cron.schedule(`0 0 0 * * *`, async () => {
         }))
         const data2 = await ScheduleModel.find({type: typeSchedule[1]})
         await Promise.all(data2.map(async item => {
-            if (item.endDate.setUTCHours(0, 0, 0, 0) > new Date().setUTCHours(0, 0, 0, 0)) {
+            if (item.endDate.setUTCHours(0, 0, 0, 0) < new Date().setUTCHours(0, 0, 0, 0)) {
                 await ScheduleModel.findByIdAndUpdate(item._id, {type: typeSchedule[0]}, {new: true})
             }
         }))    

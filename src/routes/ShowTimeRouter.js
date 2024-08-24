@@ -5,5 +5,6 @@ const router = express.Router()
 
 router.post('/', middlewares.showTimeAccuracy, showTimeController.addShowTime);
 router.get('/', showTimeController.allShowTime);
+router.get('/all-by-room', showTimeController.detailShowTimeByRoom);
 
 module.exports = router
