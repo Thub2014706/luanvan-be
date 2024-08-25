@@ -99,7 +99,7 @@ const allShowTime = async (req, res) => {
             const theaterItem = await TheaterModel.findOne({ _id: theater, isDelete: false, status: true });
             if (room) {
                 const roomItem = await RoomModel.findOne({_id: room, isDelete: false, status: true})
-                const showTime = await ShowTimeModel.find({isDelete: false, theater, room: roomItem._id, date})
+                const showTime = await ShowTimeModel.find({isDelete: false, theater, room: roomItem._id, date}).sort({timeStart: 1})
                 dataBig.push({
                     theater: theaterItem,
                     rooms: [{
@@ -111,7 +111,7 @@ const allShowTime = async (req, res) => {
                 const rooms = await RoomModel.find({theater: theaterItem._id, isDelete: false, status: true})
                 let data = await Promise.all(
                     rooms.map(async mini => {
-                        const showTime = await ShowTimeModel.find({isDelete: false, theater, room: mini._id, date})
+                        const showTime = await ShowTimeModel.find({isDelete: false, theater, room: mini._id, date}).sort({timeStart: 1})
                         return ({
                             room: mini,
                             showTimes: showTime
@@ -130,7 +130,7 @@ const allShowTime = async (req, res) => {
                     const rooms = await RoomModel.find({theater: item._id, isDelete: false, status: true})
                     const roomsData = await Promise.all(
                         rooms.map(async mini => {
-                            const showTime = await ShowTimeModel.find({isDelete: false, theater, theater: item._id, room: mini._id, date})
+                            const showTime = await ShowTimeModel.find({isDelete: false, theater, theater: item._id, room: mini._id, date}).sort({timeStart: 1})
                             return {
                                 room: mini,
                                 showTimes: showTime
