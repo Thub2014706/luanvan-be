@@ -4,9 +4,54 @@ const FilmModel = require("../models/FilmModel")
 const TheaterModel = require("../models/TheaterModel")
 const ShowTimeModel = require("../models/ShowTimeModel")
 const RoomModel = require("../models/RoomModel")
+const cron = require('node-cron');
+
 
 const addShowTime = async (req, res) => {
     const {theater, room, film, date, translate, timeStart, timeEnd} = req.body
+    if (!date || !translate || !timeStart || !timeEnd) {
+        return res.status(400).json({
+            message: "Nhập đầy đủ thông tin",
+        })
+    }
+
+    const [hoursStart, minutesStart] = timeStart.split(':').map(Number);
+    const [hoursEnd, minutesEnd] = timeEnd.split(':').map(Number);
+    const now = new Date();
+    
+    const hours = now.getHours();
+    const minutes = now.getMinutes();
+    if (now.setUTCHours(0, 0, 0, 0) === new Date(date).getTime()) {
+        if (hoursStart < hours || (hoursStart === hours && minutesStart < minutes)) {
+            return res.status(400).json({
+                message: "Đã quá thời gian đặt suất chiếu này",
+            })
+        }
+    }
+
+    const overlappingShowTime = await ShowTimeModel.findOne({
+        theater,
+        room,
+        date,
+        $or: [
+            {
+                timeStart: { $lte: timeStart },
+                timeEnd: { $gte: timeStart }
+            },
+            {
+                timeStart: { $lte: timeEnd },
+                timeEnd: { $gte: timeEnd },
+            },
+        ],
+    });
+
+    // console.log(overlappingShowTime.timeEnd - timeStart)
+    if (overlappingShowTime) {
+        return res.status(400).json({
+            message: "Lịch chiếu đã trùng với suất chiếu khác",
+        });
+    }
+
 
     try {
         const filmFind = await FilmModel.findById(film)
@@ -19,7 +64,7 @@ const addShowTime = async (req, res) => {
         const data = await ShowTimeModel.create({...req.body, type, status: typeSchedule[2]})
         res.status(200).json(data)
     } catch (error) {
-        console.log(error)
+        console.log(error, req.body)
         res.status(500).json({
             message: "Đã có lỗi xảy ra",
         })
@@ -99,6 +144,11 @@ const allShowTime = async (req, res) => {
                 })
             )
         }
+        // const now = new Date();
+        // const hours = now.getHours();
+        // const minutes = now.getMinutes();
+        // const time = '21:30'
+        // console.log(moment(time).format('HH:mm'))
         res.status(200).json(dataBig.flat())
     } catch (error) {
         console.log(error, theater, room)
@@ -107,6 +157,42 @@ const allShowTime = async (req, res) => {
         })
     }
 }
+
+cron.schedule(`0 0,5,10,15,20,25,30,35,40,45,50,55 0,1,2,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23 * * *`, async () => {
+    try {
+        const data1 = await ShowTimeModel.find({status: typeSchedule[2]})
+        await Promise.all(data1.map(async item => {
+            const [hoursStart, minutesStart] = item.timeStart.split(':').map(Number);
+            const now = new Date();
+
+            const hours = now.getHours();
+            const minutes = now.getMinutes();
+            if (item.date.setUTCHours(0, 0, 0, 0) === now.setUTCHours(0, 0, 0, 0)) {
+                if (hours === hoursStart && minutes === minutesStart) {
+                    await ShowTimeModel.findByIdAndUpdate(item._id, {status: typeSchedule[1]}, {new: true})
+                }
+            }
+        }))
+        const data2 = await ShowTimeModel.find({status: typeSchedule[1]})
+        await Promise.all(data2.map(async item => {
+            const [hoursEnd, minutesEnd] = item.timeEnd.split(':').map(Number);
+            const now = new Date();
+
+            const hours = now.getHours();
+            const minutes = now.getMinutes();
+            if (item.date.setUTCHours(0, 0, 0, 0) === now.setUTCHours(0, 0, 0, 0)) {
+                if (hours === hoursEnd && minutes === minutesEnd) {
+                    await ShowTimeModel.findByIdAndUpdate(item._id, {status: typeSchedule[0]}, {new: true})
+                }
+            }
+        }))    
+        // console.log(data1, data2)  
+    } catch (error) {
+        console.log(error)
+    }
+})
+
+
 
 module.exports = {
     addShowTime,
