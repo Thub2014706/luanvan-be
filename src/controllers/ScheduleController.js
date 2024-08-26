@@ -130,21 +130,24 @@ const detailSchedule = async (req, res) => {
 }
 
 const listSchedule = async (req, res) => {
-    const {endDate} = req.query
+    const {date} = req.query
     try {
         const schedules = await ScheduleModel.find({
-            $or: [{type: typeSchedule[1]} , {type: typeSchedule[2]}], 
-            endDate: { $gte: new Date(endDate) },
+            type: {$ne: typeSchedule[0]},
+            startDate: { $lte: new Date(date) },
+            endDate: { $gte: new Date(date) },
         })
         // const data
-        const data = await Promise.all(schedules.map(async item => {
-            const film = await FilmModel.findById(item.film)
-            return {
-                schedule: item,
-                nameFilm: film.name
+        const data = (await Promise.all(schedules.map(async item => {
+            const film = await FilmModel.findOne({_id: item.film, status: true})
+            if (film) {
+                return {
+                    schedule: item,
+                    nameFilm: film.name
+                }
             }
-        }))
-        // console.log((new Date().setUTCHours(0, 0, 0, 0)))
+        }))).filter(item => item !== undefined);
+        // console.log(data)
         res.status(200).json(data)
     } catch (error) {
         console.log(error)

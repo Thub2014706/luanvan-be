@@ -199,6 +199,9 @@ const theaterAccuracy = accuracy(allAccess[8])
 // người dùng là admin hoặc staff
 const staffAccuracy = accuracy(allAccess[9])
 
+// người dùng là admin hoặc price
+const priceAccuracy = accuracy(allAccess[10])
+
 // người dùng là admin hoặc schedule
 const scheduleAccuracy = accuracy(allAccess[11])
 
@@ -219,6 +222,7 @@ module.exports = {
     discountAccuracy,
     theaterAccuracy,
     staffAccuracy,
+    priceAccuracy,
     scheduleAccuracy,
     showTimeAccuracy
 }

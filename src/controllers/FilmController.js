@@ -143,15 +143,15 @@ const listFilm = async (req, res) => {
     try {
         const existing = await FilmModel.find({status: true});
         let data = []
-        await Promise.all(existing.map(async item => {
-            const schedule = await ScheduleModel.findOne({film: item._id})
-            if (schedule === null || schedule.type === typeSchedule[0]) {
-                data.push(item);
+        for (const item of existing) {
+            const schedule = await ScheduleModel.find({film: item._id});
+            if (schedule.length > 0) {
+                const hasType1 = schedule.some(item => item.type === typeSchedule[1] || item.type === typeSchedule[2]);
+                if (!hasType1) {
+                    data.push(item)
+                }
             }
-            // console.log(new Date(schedule.endDate).getTime(), Date.now())
-            return data
-        }))
-        console.log(data)
+        }
         res.status(200).json(data)
     } catch (error) {
         console.log(error)

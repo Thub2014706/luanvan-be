@@ -31,9 +31,25 @@ const typeShowTime = {
     1: 'Theo lịch',
 }
 
+const timePrice = {
+    0: 'Thứ 2 đến thứ 5 trước 17h',
+    1: 'Thứ 2 đến thứ 5 sau 17h',
+    2: 'Thứ 6 đến chủ nhật trước 17h',
+    3: 'Thứ 6 đến chủ nhật sau 17h'
+}
+
+const typeUser = {
+    1: 'Học sinh, sinh viên',
+    2: 'Người lớn',
+    3: 'Người già, trẻ em',
+    4: 'Thành viên, vé trực tuyến'
+}
+
 module.exports = {
     typeSeatEnum,
     allAccess,
     typeSchedule,
-    typeShowTime
+    typeShowTime,
+    timePrice,
+    typeUser
 };
