@@ -11,5 +11,6 @@ router.get('/detail/:id', filmController.detailFilm);
 router.get('/', filmController.allFilm);
 router.patch('/status/:id', middlewares.filmAccuracy, filmController.statusFilm);
 router.get('/list', filmController.listFilm);
+router.get('/list-film-not-screened', filmController.listFilmNotEd);
 
 module.exports = router

@@ -192,10 +192,24 @@ cron.schedule(`0 0,5,10,15,20,25,30,35,40,45,50,55 0,1,2,6,7,8,9,10,11,12,13,14,
     }
 })
 
+const listShowTimeByDay = async (req, res) => {
+    const { theater, date, film } = req.query
+    try {
+        const data = await ShowTimeModel.find({isDelete: false, theater, date, film})
+        res.status(200).json(data)
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({
+            message: "Đã có lỗi xảy ra",
+        })
+    }
+}
+
 
 
 module.exports = {
     addShowTime,
     allShowTime,
-    detailShowTimeByRoom
+    detailShowTimeByRoom,
+    listShowTimeByDay
 }
