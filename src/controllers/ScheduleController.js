@@ -179,7 +179,7 @@ const listSchedule = async (req, res) => {
 //     }
 // }
 
-cron.schedule(`0 0 0 * * *`, async () => {
+cron.schedule(`0 0 * * * *`, async () => {
     try {
         const data1 = await ScheduleModel.find({type: typeSchedule[2]})
         await Promise.all(data1.map(async item => {

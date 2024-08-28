@@ -2,7 +2,7 @@ const bcrypt = require('bcrypt')
 const StaffModel = require('../models/StaffModel')
 
 const createStaff = async (req, res) => {
-    const { username, email, phone, password, confirmPassword } = req.body
+    const { username, email, phone, password, confirmPassword, theater } = req.body
     let avatar;
     if (req.file) { 
         avatar = req.file.filename;
@@ -18,7 +18,7 @@ const createStaff = async (req, res) => {
         })
     }
 
-    if (!username || !phone || !email || !password || !confirmPassword) {
+    if (!username || !phone || !email || !password || !confirmPassword || !theater) {
         return res.status(400).json({
             message: "Nhập đầy đủ thông tin"
         })
@@ -51,7 +51,7 @@ const createStaff = async (req, res) => {
     try {
         const salt = await bcrypt.genSalt(5);
         hashedPassword = await bcrypt.hash(password, salt);
-        const user = await StaffModel.create({ username, email, phone, password: hashedPassword, avatar })
+        const user = await StaffModel.create({ username, email, phone, password: hashedPassword, avatar, theater })
         res.status(200).json(user)
     } catch (error) {
         console.log(error)

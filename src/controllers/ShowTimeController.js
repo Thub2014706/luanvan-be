@@ -91,6 +91,19 @@ const detailShowTimeByRoom = async (req, res) => {
     }
 }
 
+const detailShowTimeByTime = async (req, res) => {
+    const { theater, date, timeStart, timeEnd } = req.query
+    try {
+        const data = await ShowTimeModel.findOne({isDelete: false, theater, timeStart, timeEnd, date})
+        res.status(200).json(data)
+    } catch (error) {
+        console.log(error, req.query)
+        res.status(500).json({
+            message: "Đã có lỗi xảy ra",
+        })
+    }
+}
+
 const allShowTime = async (req, res) => {
     const { theater, room, date } = req.query
     try {
@@ -195,7 +208,7 @@ cron.schedule(`0 0,5,10,15,20,25,30,35,40,45,50,55 0,1,2,6,7,8,9,10,11,12,13,14,
 const listShowTimeByDay = async (req, res) => {
     const { theater, date, film } = req.query
     try {
-        const data = await ShowTimeModel.find({isDelete: false, theater, date, film})
+        const data = await ShowTimeModel.find({isDelete: false, theater, date, film}).sort({timeStart: 1, timeEnd: 1})
         res.status(200).json(data)
     } catch (error) {
         console.log(error)
@@ -211,5 +224,6 @@ module.exports = {
     addShowTime,
     allShowTime,
     detailShowTimeByRoom,
-    listShowTimeByDay
+    listShowTimeByDay,
+    detailShowTimeByTime
 }

@@ -57,7 +57,8 @@ const login = async (req, res, model) => {
             id: existingUser._id, 
             username: existingUser.username,
             role: existingUser.role,
-            access: existingUser.access
+            access: existingUser.access,
+            theater: existingUser.theater
         }
         const accessToken = accuracyAccessToken(data)
         const refreshToken = accuracyRefreshToken(data)
@@ -106,7 +107,8 @@ const refreshToken = async (req, res) => {
                 id: user.id, 
                 username: user.username,
                 role: user.role,
-                access: user.access
+                access: user.access,
+                theater: user.theater
             }
             const newAccessToken = accuracyAccessToken(data)
             const newRefreshToken = accuracyRefreshToken(data)

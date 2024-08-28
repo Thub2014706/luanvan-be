@@ -9,6 +9,7 @@ const StaffSchema = new mongoose.Schema({
     // qrCode: { type: String, required: true, unique: true },
     role: { type: Number, default: 1 },
     access: { type: Array },
+    theater: { type: mongoose.Schema.Types.ObjectId, ref: 'Theater'},
     status: { type: Boolean, required: true, default: true },
     isDelete: { type: Boolean, required: true, default: false },
 }, {
