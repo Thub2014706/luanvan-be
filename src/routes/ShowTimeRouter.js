@@ -5,7 +5,7 @@ const router = express.Router()
 
 router.post('/', middlewares.showTimeAccuracy, showTimeController.addShowTime);
 router.get('/', showTimeController.allShowTime);
-router.get('/detail-by-time', showTimeController.detailShowTimeByTime);
+router.get('/detail-by-id/:id', showTimeController.detailShowTimeById);
 router.get('/all-by-room', showTimeController.detailShowTimeByRoom);
 router.get('/list-by-day', showTimeController.listShowTimeByDay);
 

@@ -91,13 +91,13 @@ const detailShowTimeByRoom = async (req, res) => {
     }
 }
 
-const detailShowTimeByTime = async (req, res) => {
-    const { theater, date, timeStart, timeEnd } = req.query
+const detailShowTimeById = async (req, res) => {
+    const id = req.params.id
     try {
-        const data = await ShowTimeModel.findOne({isDelete: false, theater, timeStart, timeEnd, date})
+        const data = await ShowTimeModel.findById(id)
         res.status(200).json(data)
     } catch (error) {
-        console.log(error, req.query)
+        console.log(error)
         res.status(500).json({
             message: "Đã có lỗi xảy ra",
         })
@@ -225,5 +225,5 @@ module.exports = {
     allShowTime,
     detailShowTimeByRoom,
     listShowTimeByDay,
-    detailShowTimeByTime
+    detailShowTimeById
 }
