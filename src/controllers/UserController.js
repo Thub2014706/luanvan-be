@@ -48,7 +48,7 @@ const register = async (req, res) => {
     try {
         const salt = await bcrypt.genSalt(5);
         hashedPassword = await bcrypt.hash(password, salt);
-        const data = { username, email, phone }
+        const data = { phone }
         const dataString = JSON.stringify(data)
         const qr = await QRCode.toDataURL(dataString)
         const user = await UserModel.create({ username, email, phone, password: hashedPassword, qrCode: qr })
@@ -104,8 +104,22 @@ const statusUser = async (req, res) => {
     }
 }
 
+const detailUserByPhone = async (req, res) => {
+    const {phone} = req.query
+    try {
+        const data = await UserModel.findOne({phone})
+        res.status(200).json(data)
+    } catch (error) {
+        // console.log(error)
+        res.status(500).json({
+            message: "Đã có lỗi xảy ra",
+        })
+    }
+}
+
 module.exports = {
     register,
     allUser,
-    statusUser
+    statusUser,
+    detailUserByPhone
 }
