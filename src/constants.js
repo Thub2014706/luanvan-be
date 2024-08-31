@@ -20,6 +20,19 @@ const allAccess = {
     12: 'Suất chiếu'
 }
 
+const typeSurcharge = {
+    0: '3D',
+    1: 'IMAX',
+    2: 'Ghế VIP',
+    3: 'Ghế Couple',
+};
+
+const typeRoom = {
+    0: '2D',
+    1: '3D',
+    2: 'IMAX'
+}
+
 const typeSchedule = {
     0: 'Đã chiếu',
     1: 'Đang chiếu',
@@ -51,5 +64,7 @@ module.exports = {
     typeSchedule,
     typeShowTime,
     timePrice,
-    typeUser
+    typeUser,
+    typeRoom,
+    typeSurcharge
 };

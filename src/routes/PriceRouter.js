@@ -5,5 +5,6 @@ const router = express.Router()
 
 router.put('/', middlewares.priceAccuracy, priceController.addPrice);
 router.get('/detail', priceController.detailPrice);
+router.get('/detail-by-user', priceController.detailPriceByUser);
 
 module.exports = router
