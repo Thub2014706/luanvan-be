@@ -87,5 +87,5 @@ const detailPriceByUser = async (req, res) => {
 module.exports = {
     addPrice,
     detailPrice,
-    detailPriceByUser
+    detailPriceByUser,
 }

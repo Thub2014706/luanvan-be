@@ -17,7 +17,8 @@ const allAccess = {
     9: 'Nhân viên',
     10: 'Giá vé',
     11: 'Lịch chiếu',
-    12: 'Suất chiếu'
+    12: 'Suất chiếu',
+    13: 'Đặt vé'
 }
 
 const typeSurcharge = {

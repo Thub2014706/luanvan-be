@@ -208,6 +208,9 @@ const scheduleAccuracy = accuracy(allAccess[11])
 // người dùng là admin hoặc showtime
 const showTimeAccuracy = accuracy(allAccess[12])
 
+// người dùng là admin hoặc orderticket
+const orderTicketAccuracy = accuracy(allAccess[13])
+
 module.exports = { 
     userAccuracy, 
     userAdminAccuracy, 
@@ -224,5 +227,6 @@ module.exports = {
     staffAccuracy,
     priceAccuracy,
     scheduleAccuracy,
-    showTimeAccuracy
+    showTimeAccuracy,
+    orderTicketAccuracy,
 }
