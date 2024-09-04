@@ -193,7 +193,7 @@ cron.schedule(`0 0 * * * *`, async () => {
                 await ScheduleModel.findByIdAndUpdate(item._id, {type: typeSchedule[0]}, {new: true})
             }
         }))    
-        console.log(data1, data2)  
+        // console.log(data1, data2)  
     } catch (error) {
         console.log(error)
     }

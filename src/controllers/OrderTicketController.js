@@ -1,14 +1,19 @@
 const OrderTicketModel = require("../models/OrderTicketModel")
 
 const addOrderTicket = async (req, res) => {
-    const {showTime, } = req.body
+    const {showTime, idOrder, seat, staff, price } = req.body
     
     try {
-        const idOrder = 'CINE' + new Date().getTime()
-        const data = await OrderTicketModel.create({...req.body, idOrder})
+        let order
+        if (!idOrder) {   
+            order = 'CINE' + new Date().getTime()
+        } else {
+            order = idOrder
+        }
+        const data = await OrderTicketModel.create({showTime, idOrder: order, seat, staff, price})
         res.status(200).json(data)
     } catch (error) {
-        console.log('ee', error)
+        console.log('ee', req.body)
         res.status(500).json({
             message: "Đã có lỗi xảy ra",
         })

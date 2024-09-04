@@ -2,6 +2,7 @@ var accessKey = 'F8BBA842ECF85';
 var secretKey = 'K951B6PE1waDMi640xX08PD3vg6EkVlz';
 const { default: axios } = require('axios');
 const crypto = require('crypto');
+const { addOrderTicket } = require('./OrderTicketController');
 
 const momoPost = async (req, res) => {
     //https://developers.momo.vn/#/docs/en/aiov2/?id=payment-method
@@ -9,7 +10,7 @@ const momoPost = async (req, res) => {
     var orderInfo = 'Thanh toán với MoMo';
     var partnerCode = 'MOMO';
     var redirectUrl = 'http://localhost:3002/book-tickets';
-    var ipnUrl = 'http://localhost:3002/book-tickets';
+    var ipnUrl = 'https://635e-14-184-65-120.ngrok-free.app/api/momo/callback';
     var requestType = "payWithMethod";
     var amount = req.body.amount;
     var orderId = 'CINE' + new Date().getTime();
@@ -76,7 +77,18 @@ const momoPost = async (req, res) => {
 const callback = async (req, res) => {
     console.log("callback:")
     console.log(req.body)
-    res.status(200).json(req.body)
+    const {resultCode} = req.body
+    if (resultCode === '0') {
+        addOrderTicket()
+    }
+    try {
+        
+        res.status(200).json(req.body)
+    } catch (error) {
+        res.status(500).json({
+            message: "Đã có lỗi xảy ra",
+        })
+    }
 }
 
 const checkStatus = async (req, res) => {
