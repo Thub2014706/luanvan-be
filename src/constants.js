@@ -59,6 +59,12 @@ const typeUser = {
     4: 'Thành viên, vé trực tuyến'
 }
 
+const typePay = {
+    0: 'Chờ thanh toán',
+    1: 'Thanh toán thành công',
+    2: 'Thanh toán không thành công',
+}
+
 module.exports = {
     typeSeatEnum,
     allAccess,
@@ -67,5 +73,6 @@ module.exports = {
     timePrice,
     typeUser,
     typeRoom,
-    typeSurcharge
+    typeSurcharge,
+    typePay
 };
