@@ -11,8 +11,8 @@ const momoPost = async (req, res) => {
     //parameters
     var orderInfo = 'Thanh toán với MoMo';
     var partnerCode = 'MOMO';
-    var redirectUrl = 'http://localhost:3002/book-tickets/success';
-    var ipnUrl = 'https://7b58-14-184-65-120.ngrok-free.app/api/momo/callback';
+    var redirectUrl = `http://localhost:3002/book-tickets/success`;
+    var ipnUrl = 'https://3329-14-184-65-120.ngrok-free.app/api/momo/callback';
     var requestType = "payWithMethod";
     var amount = req.body.amount;
     var orderId = 'CINE' + new Date().getTime();

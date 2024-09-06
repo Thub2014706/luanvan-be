@@ -65,6 +65,11 @@ const typePay = {
     2: 'Thanh toán không thành công',
 }
 
+const methodPay = {
+    0: 'Thanh toán Momo',
+    1: 'Thanh toán tiền mặt',
+};
+
 module.exports = {
     typeSeatEnum,
     allAccess,
@@ -74,5 +79,6 @@ module.exports = {
     typeUser,
     typeRoom,
     typeSurcharge,
-    typePay
+    typePay,
+    methodPay
 };
