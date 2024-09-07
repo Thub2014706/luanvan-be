@@ -1,9 +1,10 @@
 const { typePay } = require("../constants")
 const SeatModel = require("../models/SeatModel")
+const UserModel = require("../models/UserModel")
 const OrderTicketModel = require("../models/OrderTicketModel")
 
 const addOrderTicket = async (req, res) => {
-    const {showTime, idOrder, seat, staff, price, paymentMethod } = req.body
+    const {showTime, idOrder, seat, staff, price, paymentMethod, member, combo } = req.body
     try {
         let order
         if (!idOrder) {   
@@ -17,10 +18,43 @@ const addOrderTicket = async (req, res) => {
         } else {
             status = typePay[1]
         }
-        const data = await OrderTicketModel.create({showTime, idOrder: order, seat, staff, price, status})
+        if (member !== '') {
+            const user = await UserModel.findById(member)
+            if (user.level === 1) {
+                const sumPoint = user.point + (0.05 * price)
+                let getPoint
+                if (sumPoint % 1000 >= 1 && sumPoint % 1000 <=499) {
+                    getPoint = sumPoint - sumPoint % 1000
+                } else {
+                    getPoint = sumPoint + (1000 - sumPoint % 1000)
+                }
+                await UserModel.findByIdAndUpdate({_id: member}, {point: getPoint}, {new: true})
+            } else {
+                const sumPoint = user.point + (0.07 * price)
+                let getPoint
+                if (sumPoint % 1000 >= 1 && sumPoint % 1000 <=499) {
+                    getPoint = sumPoint - sumPoint % 1000
+                } else {
+                    getPoint = sumPoint + (1000 - sumPoint % 1000)
+                }
+                await UserModel.findByIdAndUpdate({_id: member}, {point: getPoint}, {new: true})
+            }
+            if (user.level === 1 && user.point + (0.05 * price) >= 4000000) {
+                await UserModel.findByIdAndUpdate({_id: member}, {level: 2}, {new: true})
+            }
+        }
+        const data = await OrderTicketModel.create({
+            showTime, 
+            idOrder: order, 
+            seat, 
+            staff, 
+            price, 
+            status, ...(member !== '' && { member } ),
+            ...(combo.length !== 0 && { combo } )
+        })
         res.status(200).json(data)
     } catch (error) {
-        console.log('ee')
+        console.log('ee', error)
         res.status(500).json({
             message: "Đã có lỗi xảy ra",
         })

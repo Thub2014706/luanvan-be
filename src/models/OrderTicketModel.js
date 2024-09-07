@@ -6,7 +6,8 @@ const OrderTicketSchema = new mongoose.Schema({
     staff: { type: mongoose.Schema.Types.ObjectId, ref: 'Staff', required: true},
     seat: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Seat', required: true}],
     price: { type: Number, required: true },
-    // paymentMethod: { type: String, required: true },
+    combo: { type: Array },
+    member: { type: mongoose.Schema.Types.ObjectId, ref: 'User'},
     status: { type: String, required: true },
 }, {
     timestamps: true 

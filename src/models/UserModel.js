@@ -9,6 +9,7 @@ const UserSchema = new mongoose.Schema({
     // birth:  { type: Date, required: true },
     phone:  { type: String, required: true, unique: true },
     qrCode: { type: String, required: true, unique: true },
+    level: { type: Number, default: 1 },
     point: { type: Number, default: 0 },
     status: { type: Boolean, required: true, default: true },
     isDelete: { type: Boolean, required: true, default: false },
