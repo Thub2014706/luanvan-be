@@ -1,10 +1,8 @@
 const mongoose = require('mongoose');
 
-const OrderTicketSchema = new mongoose.Schema({
+const OrderComboSchema = new mongoose.Schema({
     idOrder: { type: String, required: true },
-    showTime: { type: mongoose.Schema.Types.ObjectId, ref: 'ShowTime', required: true},
     staff: { type: mongoose.Schema.Types.ObjectId, ref: 'Staff', required: true},
-    seat: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Seat', required: true}],
     price: { type: Number, required: true },
     usePoint: { type: Number },
     combo: { type: Array },
@@ -14,6 +12,6 @@ const OrderTicketSchema = new mongoose.Schema({
     timestamps: true 
 });
 
-const OrderTicketModel = mongoose.model('OrderTicket', OrderTicketSchema)
+const OrderComboModel = mongoose.model('OrderCombo', OrderComboSchema)
 
-module.exports = OrderTicketModel
+module.exports = OrderComboModel

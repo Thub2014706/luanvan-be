@@ -164,7 +164,7 @@ const allShowTime = async (req, res) => {
         // console.log(moment(time).format('HH:mm'))
         res.status(200).json(dataBig.flat())
     } catch (error) {
-        console.log(error, theater, room)
+        console.log(error)
         res.status(500).json({
             message: "Đã có lỗi xảy ra",
         })

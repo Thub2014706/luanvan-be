@@ -16,6 +16,7 @@ const surchargeRouter = require('./SurchargeRouter')
 const showTimeRouter = require('./ShowTimeRouter')
 const momoRouter = require('./MomoRouter')
 const orderTicketRouter = require('./OrderTicketRouter')
+const orderComboRouter = require('./OrderComboRouter')
 
 const routes = (app) => {
     app.use('/api/user/', userRouter)
@@ -36,6 +37,7 @@ const routes = (app) => {
     app.use('/api/surcharge/', surchargeRouter)
     app.use('/api/momo/', momoRouter)
     app.use('/api/order-ticket/', orderTicketRouter)
+    app.use('/api/order-combo/', orderComboRouter)
 
 }
 

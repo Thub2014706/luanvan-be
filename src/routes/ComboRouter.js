@@ -10,5 +10,6 @@ router.get('/detail/:id', comboController.detailCombo);
 router.get('/', comboController.allCombo);
 router.patch('/status/:id', middlewares.comboAccuracy, comboController.statusCombo);
 router.delete('/:id', middlewares.comboAccuracy, comboController.deleteCombo);
+router.get('/list', comboController.listCombo);
 
 module.exports = router

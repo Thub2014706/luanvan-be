@@ -5,14 +5,15 @@ const crypto = require('crypto');
 const { addOrderTicket } = require('./OrderTicketController');
 const OrderTicketModel = require('../models/OrderTicketModel');
 const { typePay } = require('../constants');
+const OrderComboModel = require('../models/OrderComboModel');
 
-const momoPost = async (req, res) => {
+const momoPost = async (req, res, urlRedirectUrl, urlIpnUrl) => {
     //https://developers.momo.vn/#/docs/en/aiov2/?id=payment-method
     //parameters
     var orderInfo = 'Thanh toán với MoMo';
     var partnerCode = 'MOMO';
-    var redirectUrl = `http://localhost:3002/book-tickets/success`;
-    var ipnUrl = 'https://3329-14-184-65-120.ngrok-free.app/api/momo/callback';
+    var redirectUrl = `http://localhost:3002/${urlRedirectUrl}`;
+    var ipnUrl = `https://02e5-14-227-112-114.ngrok-free.app/api/momo/${urlIpnUrl}`;
     var requestType = "payWithMethod";
     var amount = req.body.amount;
     var orderId = 'CINE' + new Date().getTime();
@@ -76,14 +77,17 @@ const momoPost = async (req, res) => {
     }
 }
 
-const callback = async (req, res) => {
+const momoTicket = async (req, res) => momoPost(req, res, 'book-tickets/success', 'callback-ticket')
+const momoCombo = async (req, res) => momoPost(req, res, 'order-food/success', 'callback-combo')
+
+const callback = async (req, res, model) => {
     console.log("callback:")
     console.log(req.body)
     const { resultCode, orderId } = req.body
     if (resultCode === 0) {
-        await OrderTicketModel.findOneAndUpdate({idOrder: orderId}, {status: typePay[1]}, {new: true})
+        await model.findOneAndUpdate({idOrder: orderId}, {status: typePay[1]}, {new: true})
     } else {
-        await OrderTicketModel.findOneAndUpdate({idOrder: orderId}, {status: typePay[2]}, {new: true})
+        await model.findOneAndUpdate({idOrder: orderId}, {status: typePay[2]}, {new: true})
     }
     try {
         
@@ -94,6 +98,11 @@ const callback = async (req, res) => {
         })
     }
 }
+
+const callbackTicket = async (req, res) => callback(req, res, OrderTicketModel)
+
+const callbackCombo = async (req, res) => callback(req, res, OrderComboModel)
+
 
 const checkStatus = async (req, res) => {
     const { orderId } = req.body;
@@ -130,7 +139,9 @@ const checkStatus = async (req, res) => {
   
 
 module.exports = {
-    momoPost,
-    callback,
+    momoTicket,
+    momoCombo,
+    callbackTicket,
+    callbackCombo,
     checkStatus,
 }

@@ -137,6 +137,17 @@ const deleteCombo = async (req, res) => {
     }
 }
 
+const listCombo = async (req, res) => {
+    try {
+        const data = await ComboModel.find({status: true}).sort({createdAt: -1})
+        res.status(200).json(data)
+    } catch (error) {
+        res.status(500).json({
+            message: "Đã có lỗi xảy ra",
+        })
+    }
+}
+
 
 module.exports = {
     addCombo,
@@ -144,5 +155,6 @@ module.exports = {
     updateCombo,
     detailCombo,
     statusCombo,
-    deleteCombo
+    deleteCombo,
+    listCombo
 }
