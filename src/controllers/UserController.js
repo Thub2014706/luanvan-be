@@ -117,9 +117,23 @@ const detailUserByPhone = async (req, res) => {
     }
 }
 
+const detailUserById = async (req, res) => {
+    const id = req.params.id
+    try {
+        const data = await UserModel.findById(id)
+        res.status(200).json(data)
+    } catch (error) {
+        // console.log(error)
+        res.status(500).json({
+            message: "Đã có lỗi xảy ra",
+        })
+    }
+}
+
 module.exports = {
     register,
     allUser,
     statusUser,
-    detailUserByPhone
+    detailUserByPhone,
+    detailUserById
 }

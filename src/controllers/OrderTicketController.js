@@ -2,6 +2,8 @@ const { typePay } = require("../constants")
 const SeatModel = require("../models/SeatModel")
 const UserModel = require("../models/UserModel")
 const OrderTicketModel = require("../models/OrderTicketModel")
+const TheaterModel = require("../models/TheaterModel")
+const ShowTimeModel = require("../models/ShowTimeModel")
 
 const addOrderTicket = async (req, res) => {
     const {showTime, idOrder, seat, staff, price, paymentMethod, member, combo, usePoint } = req.body
@@ -93,8 +95,47 @@ const allOrderTicketSelled = async (req, res) => {
     }
 }
 
+const allOrderTicket = async (req, res) => {
+    const {theater, number, show} = req.query
+    try {
+        const data = await OrderTicketModel.find({}).sort({createdAt: -1})
+        let getData
+        if (theater) {
+            getData = await Promise.all(data.map(async item => {
+                const showtime = await ShowTimeModel.findById(item.showTime)
+                if (showtime && showtime.theater.toString() === theater.toString()) {
+                    return item
+                } else {
+                    return null
+                }
+            }))
+        } else {
+            getData = data
+        }
+
+        const finalData = getData.filter(item => item !== null)
+
+        const start = (parseInt(number) - 1) * parseInt(show)
+        const end = start + parseInt(show);
+        const newAll = finalData.slice(start, end);
+        const totalPages = Math.ceil(finalData.length / parseInt(show))
+        res.status(200).json({
+            data: newAll,
+            sumPage: totalPages,
+            length: getData.length
+        })
+        
+    } catch (error) {
+        console.log('ee0', error)
+        res.status(500).json({
+            message: "Đã có lỗi xảy ra",
+        })
+    }
+}
+
 module.exports = {
     addOrderTicket,
     detailOrderTicket,
     allOrderTicketSelled,
+    allOrderTicket
 }

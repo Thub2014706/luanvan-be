@@ -11,5 +11,6 @@ router.post('/logout', middlewares.userAccuracy, authController.logout);
 router.get('/', userController.allUser);
 router.patch('/status/:id', middlewares.userAdminAccuracy, userController.statusUser);
 router.get('/detail-by-phone', userController.detailUserByPhone);
+router.get('/detail-by-id/:id', userController.detailUserById);
 
 module.exports = router

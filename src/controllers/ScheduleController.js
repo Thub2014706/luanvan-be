@@ -137,7 +137,6 @@ const listSchedule = async (req, res) => {
             startDate: { $lte: new Date(date) },
             endDate: { $gte: new Date(date) },
         })
-        // const data
         const data = (await Promise.all(schedules.map(async item => {
             const film = await FilmModel.findOne({_id: item.film, status: true})
             if (film) {

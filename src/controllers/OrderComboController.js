@@ -74,6 +74,18 @@ const detailOrderCombo = async (req, res) => {
     }
 }
 
+const allOrderCombo = async (req, res) => {
+    try {
+        const data = await OrderComboModel.find({})
+        res.status(200).json(data)
+    } catch (error) {
+        console.log('ee')
+        res.status(500).json({
+            message: "Đã có lỗi xảy ra",
+        })
+    }
+}
+
 module.exports = {
     addOrderCombo,
     detailOrderCombo

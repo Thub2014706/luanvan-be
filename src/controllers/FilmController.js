@@ -184,7 +184,7 @@ const listFilmNotEd = async (req, res) => {
                 data.push(item)
             }
         }
-        console.log(data)
+        // console.log(data)
         res.status(200).json(data)
     } catch (error) {
         console.log(error)

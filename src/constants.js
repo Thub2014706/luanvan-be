@@ -19,7 +19,8 @@ const allAccess = {
     11: 'Lịch chiếu',
     12: 'Suất chiếu',
     13: 'Đặt vé',
-    14: 'Đặt combo, bắp nước'
+    14: 'Đặt combo, bắp nước',
+    15: 'Danh sách vé'
 }
 
 const typeSurcharge = {
