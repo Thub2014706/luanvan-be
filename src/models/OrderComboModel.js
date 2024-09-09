@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 
 const OrderComboSchema = new mongoose.Schema({
     idOrder: { type: String, required: true },
+    theater: { type: mongoose.Schema.Types.ObjectId, ref: 'Theater', required: true},
     staff: { type: mongoose.Schema.Types.ObjectId, ref: 'Staff', required: true},
     price: { type: Number, required: true },
     usePoint: { type: Number },

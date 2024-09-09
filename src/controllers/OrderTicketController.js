@@ -4,6 +4,7 @@ const UserModel = require("../models/UserModel")
 const OrderTicketModel = require("../models/OrderTicketModel")
 const TheaterModel = require("../models/TheaterModel")
 const ShowTimeModel = require("../models/ShowTimeModel")
+const OrderComboModel = require("../models/OrderComboModel")
 
 const addOrderTicket = async (req, res) => {
     const {showTime, idOrder, seat, staff, price, paymentMethod, member, combo, usePoint } = req.body
@@ -98,12 +99,15 @@ const allOrderTicketSelled = async (req, res) => {
 const allOrderTicket = async (req, res) => {
     const {theater, number, show} = req.query
     try {
-        const data = await OrderTicketModel.find({}).sort({createdAt: -1})
+        const data1 = await OrderTicketModel.find({}).sort({createdAt: -1})
+        const data2 = await OrderComboModel.find({}).sort({createdAt: -1})
+        const data = [...data1, ...data2]
         let getData
         if (theater) {
             getData = await Promise.all(data.map(async item => {
                 const showtime = await ShowTimeModel.findById(item.showTime)
-                if (showtime && showtime.theater.toString() === theater.toString()) {
+                console.log('ee0', item.theater)
+                if ((showtime && showtime.theater.toString() === theater.toString()) || item.theater?.toString() === theater.toString()) {
                     return item
                 } else {
                     return null

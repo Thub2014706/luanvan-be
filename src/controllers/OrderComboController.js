@@ -3,7 +3,7 @@ const OrderComboModel = require("../models/OrderComboModel")
 const UserModel = require("../models/UserModel")
 
 const addOrderCombo = async (req, res) => {
-    const { idOrder, staff, price, paymentMethod, member, combo, usePoint } = req.body
+    const { idOrder, staff, price, paymentMethod, member, combo, usePoint, theater } = req.body
     try {
         let order
         if (!idOrder) {   
@@ -50,6 +50,7 @@ const addOrderCombo = async (req, res) => {
             status, 
             ...(member !== '' && { member, usePoint } ),
             ...(combo.length > 0 && { combo } ),
+            theater
         })
         
         res.status(200).json(data)
