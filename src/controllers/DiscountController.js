@@ -1,10 +1,10 @@
 const DiscountModel = require("../models/DiscountModel")
 
 const addDiscount = async (req, res) => {
-    const { name, code, percent, quantity } = req.body
+    const { name, code, percent, quantity, startDate, endDate } = req.body
 
     const existing = await DiscountModel.findOne({ $or: [{ name: name }, {code: code}]})
-    if (!name || !code || !percent || !quantity) {
+    if (!name || !code || !percent || !quantity || !startDate || !endDate) {
         return res.status(400).json({
             message: "Nhập đầy đủ thông tin"
         })
@@ -62,10 +62,10 @@ const allDiscount = async (req, res) => {
 
 const updateDiscount = async (req, res) => {
     const id = req.params.id
-    const { name, code, percent, quantity } = req.body
+    const { name, code, percent, quantity, startDate, endDate } = req.body
 
     const existing = await DiscountModel.findOne({$and: [{_id: { $ne: id }}, { $or: [{ name: name }, {code: code}]}]})
-    if (!name || !code || !percent || !quantity) {
+    if (!name || !code || !percent || !quantity || !startDate || !endDate) {
         return res.status(400).json({
             message: "Nhập đầy đủ thông tin"
         })

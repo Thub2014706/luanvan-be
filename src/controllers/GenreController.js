@@ -60,7 +60,7 @@ const updateGenre = async (req, res) => {
 const deleteGenre = async (req, res) => {
     const id = req.params.id
     try {
-        await FilmModel.findOneAndUpdate({ genre: { $in: [id] } }, { $pull: { genre: id } }, {new: true})
+        await FilmModel.updateMany({ genre: { $in: [id] } }, { $pull: { genre: id } }, {new: true})
 
         await GenreModel.findOneAndDelete({_id: id})
         res.status(200).json({

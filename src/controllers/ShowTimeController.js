@@ -1,10 +1,12 @@
 const moment = require("moment")
-const { typeShowTime, typeSchedule } = require("../constants")
+const { typeShowTime, typeSchedule, typePay } = require("../constants")
 const FilmModel = require("../models/FilmModel")
 const TheaterModel = require("../models/TheaterModel")
 const ShowTimeModel = require("../models/ShowTimeModel")
 const RoomModel = require("../models/RoomModel")
 const cron = require('node-cron');
+const SeatModel = require("../models/SeatModel")
+const OrderTicketModel = require("../models/OrderTicketModel")
 
 
 const addShowTime = async (req, res) => {
@@ -219,11 +221,30 @@ const listShowTimeByDay = async (req, res) => {
 }
 
 
+const soldOutSeat = async (req, res) => {
+    const {showTime} = req.query
+    try {
+        const selled = await OrderTicketModel.find({showTime, status: typePay[1]})
+        const seats = await SeatModel.find({status: true, isDelete: false})
+        if (selled.length === seats) {
+            return res.status(200).json({message: '0'})
+        } else {
+            return res.status(200).json({message: '1'})
+        }
+        // console.log(array)
+    } catch (error) {
+        console.log('ee', error, showTime)
+        res.status(500).json({
+            message: "Đã có lỗi xảy ra",
+        })
+    }
+}
 
 module.exports = {
     addShowTime,
     allShowTime,
     detailShowTimeByRoom,
     listShowTimeByDay,
-    detailShowTimeById
+    detailShowTimeById,
+    soldOutSeat
 }

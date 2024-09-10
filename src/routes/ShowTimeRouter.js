@@ -8,5 +8,6 @@ router.get('/', showTimeController.allShowTime);
 router.get('/detail-by-id/:id', showTimeController.detailShowTimeById);
 router.get('/all-by-room', showTimeController.detailShowTimeByRoom);
 router.get('/list-by-day', showTimeController.listShowTimeByDay);
+router.get('/check-seat', showTimeController.soldOutSeat);
 
 module.exports = router

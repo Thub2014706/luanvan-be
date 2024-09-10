@@ -23,6 +23,9 @@ const addOrderTicket = async (req, res) => {
         }
         if (member !== '') {
             const user = await UserModel.findById(member)
+            const allOrderTicket = await OrderTicketModel.find({member: member})
+            const allOrderCombo = await OrderComboModel.find({member: member})
+            const allOrder = [...allOrderTicket, ...allOrderCombo]
             if (user.level === 1) {
                 const sumPoint = user.point + (0.05 * price)
                 let getPoint
@@ -42,9 +45,15 @@ const addOrderTicket = async (req, res) => {
                 }
                 await UserModel.findByIdAndUpdate({_id: member}, {point: getPoint}, {new: true})
             }
-            // if (user.level === 1 && user.point + (0.05 * price) >= 4000000) {
-            //     await UserModel.findByIdAndUpdate({_id: member}, {level: 2}, {new: true})
-            // }
+
+            let sum = 0
+            allOrder.forEach(item => {
+                sum += item.price
+            })
+            // console.log('ee', sum)
+            if (user.level === 1 && sum + price >= 4000000) {
+                await UserModel.findByIdAndUpdate({_id: member}, {level: 2}, {new: true})
+            }
             await UserModel.findByIdAndUpdate({_id: member}, {point: user.point - usePoint}, {new: true})
         }
         const data = await OrderTicketModel.create({
@@ -106,7 +115,7 @@ const allOrderTicket = async (req, res) => {
         if (theater) {
             getData = await Promise.all(data.map(async item => {
                 const showtime = await ShowTimeModel.findById(item.showTime)
-                console.log('ee0', item.theater)
+                // console.log('ee0', item.theater)
                 if ((showtime && showtime.theater.toString() === theater.toString()) || item.theater?.toString() === theater.toString()) {
                     return item
                 } else {
