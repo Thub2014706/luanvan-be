@@ -194,6 +194,29 @@ const listFilmNotEd = async (req, res) => {
     }
 }
 
+const listFilmBySchedule = async (req, res) => {
+    const {type} = req.query
+    try {
+        const existing = await FilmModel.find({status: true});
+        let data = []
+        for (const item of existing) {
+            const schedule = await ScheduleModel.find({film: item._id, isDelete: false});
+            if (schedule.length > 0) {
+                const hasType1 = schedule.some(item => item.type === type);
+                if (hasType1) {
+                    data.push(item)
+                }
+            }
+        }
+        res.status(200).json(data)
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({
+            message: "Đã có lỗi xảy ra",
+        })
+    }
+}
+
 module.exports = {
     addFilm,
     getImage,
@@ -202,5 +225,6 @@ module.exports = {
     allFilm,
     statusFilm,
     listFilm,
-    listFilmNotEd
+    listFilmNotEd,
+    listFilmBySchedule
 }

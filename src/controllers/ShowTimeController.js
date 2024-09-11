@@ -222,16 +222,16 @@ const listShowTimeByDay = async (req, res) => {
 
 
 const soldOutSeat = async (req, res) => {
-    const {showTime} = req.query
+    const {showTime, room} = req.query
     try {
-        const selled = await OrderTicketModel.find({showTime, status: typePay[1]})
-        const seats = await SeatModel.find({status: true, isDelete: false})
-        if (selled.length === seats) {
-            return res.status(200).json({message: '0'})
+        const selled = await OrderTicketModel.findOne({showTime, status: typePay[1]})
+        const seats = await SeatModel.find({room ,status: true, isDelete: false})
+        // console.log(selled.seat.length, seats.length)
+        if (selled?.seat.length === seats.length) {
+            return res.status(200).json({message: 0})
         } else {
-            return res.status(200).json({message: '1'})
+            return res.status(200).json({message: 1})
         }
-        // console.log(array)
     } catch (error) {
         console.log('ee', error, showTime)
         res.status(500).json({
