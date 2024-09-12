@@ -164,38 +164,6 @@ const listFilm = async (req, res) => {
     }
 }
 
-const listFilmNotEd = async (req, res) => {
-    const {search} = req.query
-    try {
-        const existing = await FilmModel.find({status: true});
-        let data = []
-        for (const item of existing) {
-            const schedule = await ScheduleModel.findOne({film: item._id, $or: [{type: typeSchedule[1]}, {type: typeSchedule[2]}], isDelete: false});
-            if (schedule && item.name
-                    .toString()
-                    .normalize('NFD')
-                    .replace(/[\u0300-\u036f]/g, '')
-                    .toLowerCase()
-                    .includes(
-                        search
-                            .normalize('NFD')
-                            .replace(/[\u0300-\u036f]/g, '')
-                            .toLowerCase(),
-                    )
-            ) {
-                data.push(item)
-            }
-        }
-        // console.log(data)
-        res.status(200).json(data)
-    } catch (error) {
-        console.log(error)
-        res.status(500).json({
-            message: "Đã có lỗi xảy ra",
-        })
-    }
-}
-
 const listFilmBySchedule = async (req, res) => {
     const {type} = req.query
     try {
@@ -227,6 +195,5 @@ module.exports = {
     allFilm,
     statusFilm,
     listFilm,
-    listFilmNotEd,
     listFilmBySchedule
 }

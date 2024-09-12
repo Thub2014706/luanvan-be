@@ -7,10 +7,11 @@ const RoomModel = require("../models/RoomModel")
 const cron = require('node-cron');
 const SeatModel = require("../models/SeatModel")
 const OrderTicketModel = require("../models/OrderTicketModel")
+const ScheduleModel = require("../models/ScheduleModel")
 
 
 const addShowTime = async (req, res) => {
-    const {theater, room, film, date, translate, timeStart, timeEnd} = req.body
+    const {theater, room, schedule, date, translate, timeStart, timeEnd} = req.body
     if (!date || !translate || !timeStart || !timeEnd) {
         return res.status(400).json({
             message: "Nhập đầy đủ thông tin",
@@ -56,7 +57,8 @@ const addShowTime = async (req, res) => {
 
 
     try {
-        const filmFind = await FilmModel.findById(film)
+        const scheduleFind = await ScheduleModel.findById(schedule)
+        const filmFind = await FilmModel.findById(scheduleFind.film)
         let type
         if (new Date(filmFind.releaseDate) > new Date(date).setUTCHours(0, 0, 0, 0)) {
             type = typeShowTime[0]
@@ -208,10 +210,10 @@ cron.schedule(`0 0,5,10,15,20,25,30,35,40,45,50,55 0,1,2,6,7,8,9,10,11,12,13,14,
 })
 
 const listShowTimeByDay = async (req, res) => {
-    const { theater, date, film } = req.query
+    const { theater, date, schedule } = req.query
     try {
-        const data = await ShowTimeModel.find({isDelete: false, theater, date, film}).sort({timeStart: 1, timeEnd: 1})
-        res.status(200).json(data)
+        const data = await ShowTimeModel.find({isDelete: false, theater, date, schedule}).sort({timeStart: 1, timeEnd: 1})
+        res.status(200).json(data);
     } catch (error) {
         console.log(error)
         res.status(500).json({

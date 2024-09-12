@@ -152,7 +152,7 @@ const listSchedule = async (req, res) => {
                 }
             }
         }))).filter(item => item !== undefined);
-        // console.log(data)
+        // console.log(data);
         res.status(200).json(data)
     } catch (error) {
         console.log(error)
@@ -204,10 +204,43 @@ cron.schedule(`0 0 * * * *`, async () => {
     }
 })
 
+const listScheduleNotEd = async (req, res) => {
+    const {search} = req.query
+    try {
+        const existing = await ScheduleModel.find({$or: [{type: typeSchedule[1]}, {type: typeSchedule[2]}], isDelete: false});
+        let data = []
+        for (const item of existing) {
+            const film = await FilmModel.findById(item.film)
+            const get = film.name
+                .toString()
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .toLowerCase()
+                .includes(
+                    search
+                        .normalize('NFD')
+                        .replace(/[\u0300-\u036f]/g, '')
+                        .toLowerCase(),
+                )
+            if (get) {
+                data.push(item)
+            }    
+        }
+        // console.log(data)
+        res.status(200).json(data)
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({
+            message: "Đã có lỗi xảy ra",
+        })
+    }
+}
+
 module.exports = {
     addSchedule,
     updateSchedule,
     allSchedule,
     detailSchedule,
-    listSchedule
+    listSchedule,
+    listScheduleNotEd
 }
