@@ -5,7 +5,13 @@ const cron = require('node-cron');
 
 const addSchedule = async (req, res) => {
     const { film, startDate, endDate } = req.body
-    console.log(new Date(startDate).getTime(), new Date().setUTCHours(0, 0, 0, 0))
+    // console.log(new Date(startDate).getTime(), new Date().setUTCHours(0, 0, 0, 0))
+    if (!film || !startDate || !endDate) {
+        return res.status(400).json({
+            message: "Yêu cầu nhập đầy đủ thông tin"
+        })
+    }
+
     if (endDate < startDate) {
         return res.status(400).json({
             message: "Ngày kết thúc không thể sớm hơn ngày bắt đầu"

@@ -240,6 +240,22 @@ const soldOutSeat = async (req, res) => {
     }
 }
 
+const showTimeByTheaterShowing = async (req, res) => {
+    const { theater } = req.query
+    try {
+        const data = await ShowTimeModel.find({isDelete: false, theater}).sort({timeStart: 1, timeEnd: 1})
+        data.map(item => {
+            
+        })
+        res.status(200).json(data)
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({
+            message: "Đã có lỗi xảy ra",
+        })
+    }
+}
+
 module.exports = {
     addShowTime,
     allShowTime,

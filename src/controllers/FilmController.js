@@ -151,6 +151,8 @@ const listFilm = async (req, res) => {
                 if (!hasType1) {
                     data.push(item)
                 }
+            } else {
+                data.push(item)
             }
         }
         res.status(200).json(data)
