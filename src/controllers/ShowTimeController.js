@@ -222,7 +222,6 @@ const listShowTimeByDay = async (req, res) => {
     }
 }
 
-
 const soldOutSeat = async (req, res) => {
     const {showTime, room} = req.query
     try {
@@ -242,13 +241,18 @@ const soldOutSeat = async (req, res) => {
     }
 }
 
-const showTimeByTheaterShowing = async (req, res) => {
-    const { theater } = req.query
+const showTimeByTheater = async (req, res) => {
+    const { theater, typeSchedule } = req.query
     try {
-        const data = await ShowTimeModel.find({isDelete: false, theater}).sort({timeStart: 1, timeEnd: 1})
-        data.map(item => {
-            
-        })
+        const showTimes = await ShowTimeModel.find({isDelete: false, theater}).sort({timeStart: 1, timeEnd: 1})
+        const data = await Promise.all(showTimes.map(async item => {
+            const schedule = await ScheduleModel.findOne({type: typeSchedule})
+            if (schedule) {
+                return item
+            }
+        }))
+        console.log(data)
+
         res.status(200).json(data)
     } catch (error) {
         console.log(error)
@@ -258,11 +262,51 @@ const showTimeByTheaterShowing = async (req, res) => {
     }
 }
 
+const listFilmByTheater = async (req, res) => {
+    const { theater, date } = req.query;
+    try {
+        const showTimes = await ShowTimeModel.find({
+            isDelete: false,
+            theater,
+            date
+        })
+        .populate('schedule')
+        .sort({ timeStart: 1, timeEnd: 1 });
+
+        const groupedByFilm = {};
+        for (const item of showTimes) {
+            const idFilm = item.schedule.film._id;
+
+            if (!groupedByFilm[idFilm]) {
+                const film = await FilmModel.findById(idFilm);
+                groupedByFilm[idFilm] = {
+                    film,
+                    showTimes: []
+                };
+            }
+            groupedByFilm[idFilm].showTimes.push(item);
+        }
+
+        const groupedFilmsArray = Object.values(groupedByFilm);
+        console.log(groupedFilmsArray);
+
+        res.status(200).json(groupedFilmsArray);
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            message: "Đã có lỗi xảy ra",
+        });
+    }
+};
+
+
 module.exports = {
     addShowTime,
     allShowTime,
     detailShowTimeByRoom,
     listShowTimeByDay,
     detailShowTimeById,
-    soldOutSeat
+    soldOutSeat,
+    showTimeByTheater,
+    listFilmByTheater
 }
