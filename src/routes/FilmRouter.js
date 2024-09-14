@@ -12,5 +12,6 @@ router.get('/', filmController.allFilm);
 router.patch('/status/:id', middlewares.filmAccuracy, filmController.statusFilm);
 router.get('/list', filmController.listFilm);
 router.get('/list-by-schedule', filmController.listFilmBySchedule);
+router.get('/list-by-theater', filmController.listFilmByTheater);
 
 module.exports = router

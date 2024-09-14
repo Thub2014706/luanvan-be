@@ -5,6 +5,7 @@ const GenreModel = require("../models/GenreModel");
 const ScheduleModel = require("../models/ScheduleModel");
 const { typeSchedule } = require("../constants");
 const { schedule } = require("node-cron");
+const ShowTimeModel = require("../models/ShowTimeModel");
 
 const addFilm = async (req, res) => {
     const {name, time, nation, genre, director, releaseDate, endDate, age, performer, trailer, description} = req.body
@@ -75,7 +76,7 @@ const detailFilm = async (req, res) => {
         const data = await FilmModel.findById(id)
         res.status(200).json(data)
     } catch (error) {
-        console.log(error)
+        // console.log(error)
         res.status(500).json({
             message: "Đã có lỗi xảy ra",
         })
@@ -187,6 +188,29 @@ const listFilmBySchedule = async (req, res) => {
     }
 }
 
+const listFilmByTheater = async (req, res) => {
+    const {theater} = req.query
+    try {
+        const allShowTime = await ShowTimeModel.find({isDelete: false, theater})
+        const data = await Promise.all(allShowTime.map(async item => {
+            const schedule = await ScheduleModel.findOne({_id: item.schedule, $or: [{type: typeSchedule[1]}, {type: typeSchedule[2]}]})
+            const film = await FilmModel.findById(schedule.film)
+            // console.log(schedule)
+            return film
+        }))
+        const newData = data.filter((film, index, self) => 
+            index === self.findIndex((f) => f._id === film._id)
+        );
+
+        res.status(200).json(newData)
+    } catch (error) {
+        console.log(theater)
+        res.status(500).json({
+            message: "Đã có lỗi xảy ra",
+        })
+    }
+}
+
 module.exports = {
     addFilm,
     getImage,
@@ -195,5 +219,6 @@ module.exports = {
     allFilm,
     statusFilm,
     listFilm,
-    listFilmBySchedule
+    listFilmBySchedule,
+    listFilmByTheater
 }
