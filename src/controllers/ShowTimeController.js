@@ -299,6 +299,71 @@ const listFilmByTheater = async (req, res) => {
     }
 };
 
+const listDateByFilm = async (req, res) => {
+    const {film} = req.query
+    try {
+        const schedule = await ScheduleModel.findOne({film, $or: [{type: typeSchedule[1]}, {type: typeSchedule[2]}]})
+        let allShowTime = []
+        if (schedule) {
+            allShowTime = await ShowTimeModel.find({isDelete: false, schedule})
+        }
+        res.status(200).json(allShowTime)
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({
+            message: "Đã có lỗi xảy ra",
+        })
+    }
+}
+
+const showTimeFilter = async (req, res) => {
+    const {theater, film, date} = req.query
+    try {
+        const theaters = await TheaterModel.find({status: true, isDelete: false})
+        let films = []
+        let dates = []
+        let showTimes = []
+        if (theater) {
+            const allShowTime = await ShowTimeModel.find({isDelete: false, theater, status: typeSchedule[2], date: {$gte: new Date().setUTCHours(0, 0, 0, 0)}})
+            const data = await Promise.all(allShowTime.map(async item => {
+                const schedule = await ScheduleModel.findOne({_id: item.schedule, $or: [{type: typeSchedule[1]}, {type: typeSchedule[2]}]})
+                if (schedule) {
+                    const film = await FilmModel.findById(schedule.film)
+                    return film;
+                } else {
+                    return null
+                }     
+            }))
+            const filterData = data.filter(item => item !== null)
+            films = filterData.filter((film, index, self) => 
+                index === self.findIndex((f) => f._id.toString() === film._id.toString())
+            );
+            
+            if (film) {
+                const schedule = await ScheduleModel.findOne({film, $or: [{type: typeSchedule[1]}, {type: typeSchedule[2]}]})
+                // let allShowTime = []
+                if (schedule) {
+                    const listDate = await ShowTimeModel.find({isDelete: false, schedule, theater, date: {$gte: new Date().setUTCHours(0, 0, 0, 0)}}, 'date -_id')
+                    dates = listDate.filter((date, index, self) => 
+                        index === self.findIndex((d) => new Date(d.date).getTime() === new Date(date.date).getTime())
+                    );
+                    
+                    if (date) {
+                        showTimes = await ShowTimeModel.find({isDelete: false, schedule, theater, date, status: typeSchedule[2]})
+                        // console.log(showTimes)
+                    }
+                }
+
+            }
+        }
+        res.status(200).json({theaters, films, dates, showTimes})
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({
+            message: "Đã có lỗi xảy ra",
+        })
+    }
+}
 
 module.exports = {
     addShowTime,
@@ -308,5 +373,7 @@ module.exports = {
     detailShowTimeById,
     soldOutSeat,
     showTimeByTheater,
-    listFilmByTheater
+    listFilmByTheater,
+    listDateByFilm,
+    showTimeFilter
 }

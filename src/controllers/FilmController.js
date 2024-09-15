@@ -76,7 +76,7 @@ const detailFilm = async (req, res) => {
         const data = await FilmModel.findById(id)
         res.status(200).json(data)
     } catch (error) {
-        // console.log(error)
+        console.log(error)
         res.status(500).json({
             message: "Đã có lỗi xảy ra",
         })
@@ -191,20 +191,25 @@ const listFilmBySchedule = async (req, res) => {
 const listFilmByTheater = async (req, res) => {
     const {theater} = req.query
     try {
-        const allShowTime = await ShowTimeModel.find({isDelete: false, theater})
+        const allShowTime = await ShowTimeModel.find({isDelete: false, theater, status: typeSchedule[2], date: {$gte: new Date().setUTCHours(0, 0, 0, 0)}})
         const data = await Promise.all(allShowTime.map(async item => {
             const schedule = await ScheduleModel.findOne({_id: item.schedule, $or: [{type: typeSchedule[1]}, {type: typeSchedule[2]}]})
-            const film = await FilmModel.findById(schedule.film)
-            // console.log(schedule)
-            return film
+            if (schedule) {
+                const film = await FilmModel.findById(schedule.film)
+                return film;
+            } else {
+                return null
+            }     
         }))
-        const newData = data.filter((film, index, self) => 
-            index === self.findIndex((f) => f._id === film._id)
+        const filterData = data.filter(item => item !== null)
+        const newData = filterData.filter((film, index, self) => 
+            index === self.findIndex((f) => f._id.toString() === film._id.toString())
         );
+    console.log(newData)
 
         res.status(200).json(newData)
     } catch (error) {
-        console.log(theater)
+        console.log(error)
         res.status(500).json({
             message: "Đã có lỗi xảy ra",
         })

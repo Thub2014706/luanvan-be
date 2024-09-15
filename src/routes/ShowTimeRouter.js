@@ -11,5 +11,7 @@ router.get('/list-by-day', showTimeController.listShowTimeByDay);
 router.get('/check-seat', showTimeController.soldOutSeat);
 router.get('/list-by-theater', showTimeController.showTimeByTheater);
 router.get('/film-by-theater', showTimeController.listFilmByTheater);
+router.get('/date-by-film', showTimeController.listDateByFilm);
+router.get('/filter', showTimeController.showTimeFilter);
 
 module.exports = router
