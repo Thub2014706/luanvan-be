@@ -146,6 +146,32 @@ const listTheater = async (req, res) => {
     }
 }
 
+const listProvince = async (req, res) => {
+    try {
+        const data = await TheaterModel.find({isDelete: false, status: true}, 'province');
+        const newData = data.filter((item, index, self) => 
+            index === self.findIndex((i) => i.province === item.province)
+        );
+        res.status(200).json(newData)
+    } catch (error) {
+        res.status(500).json({
+            message: "Đã có lỗi xảy ra",
+        })
+    }
+}
+
+const listTheaterByProvince = async (req, res) => {
+    const {province} = req.query
+    try {
+        const data = await TheaterModel.find({isDelete: false, status: true, province});
+        res.status(200).json(data)
+    } catch (error) {
+        res.status(500).json({
+            message: "Đã có lỗi xảy ra",
+        })
+    }
+}
+
 module.exports = {
     addTheater,
     updateTheater,
@@ -153,5 +179,7 @@ module.exports = {
     statusTheater,
     detailTheater,
     allTheater,
-    listTheater
+    listTheater,
+    listProvince,
+    listTheaterByProvince
 }

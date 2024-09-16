@@ -10,5 +10,7 @@ router.get('/', theaterController.allTheater);
 router.patch('/status/:id', middlewares.theaterAccuracy, theaterController.statusTheater);
 router.patch('/delete/:id', middlewares.theaterAccuracy, theaterController.deleteTheater);
 router.get('/list', theaterController.listTheater);
+router.get('/list-province', theaterController.listProvince);
+router.get('/list-by-province', theaterController.listTheaterByProvince);
 
 module.exports = router

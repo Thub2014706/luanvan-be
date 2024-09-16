@@ -222,6 +222,20 @@ const listShowTimeByDay = async (req, res) => {
     }
 }
 
+const listShowTimeByFilm = async (req, res) => {
+    const { theater, date, film } = req.query
+    try {
+        const schedule = await ScheduleModel.findOne({film, $or: [{type: typeSchedule[1]}, {type: typeSchedule[2]}]})
+        const data = await ShowTimeModel.find({isDelete: false, theater, date, schedule}).sort({timeStart: 1, timeEnd: 1})
+        res.status(200).json(data);
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({
+            message: "Đã có lỗi xảy ra",
+        })
+    }
+}
+
 const soldOutSeat = async (req, res) => {
     const {showTime, room} = req.query
     try {
@@ -375,5 +389,6 @@ module.exports = {
     showTimeByTheater,
     listFilmByTheater,
     listDateByFilm,
-    showTimeFilter
+    showTimeFilter,
+    listShowTimeByFilm
 }
