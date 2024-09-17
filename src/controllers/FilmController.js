@@ -83,6 +83,21 @@ const detailFilm = async (req, res) => {
     }
 }
 
+const detailFilmBySchedule = async (req, res) => {
+    const id = req.params.id
+    try {
+        const schedule = await ScheduleModel.findById(id)
+        const data = await FilmModel.findById(schedule.film)
+        res.status(200).json(data)
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({
+            message: "Đã có lỗi xảy ra",
+        })
+    }
+}
+
+
 const allFilm = async (req, res) => {
     const {search, number, show} = req.query
     try {
@@ -225,5 +240,6 @@ module.exports = {
     statusFilm,
     listFilm,
     listFilmBySchedule,
-    listFilmByTheater
+    listFilmByTheater,
+    detailFilmBySchedule
 }
