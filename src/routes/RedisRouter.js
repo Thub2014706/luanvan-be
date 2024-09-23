@@ -3,6 +3,8 @@ const redisController = require('../controllers/RedisController')
 const middlewares = require('../controllers/MiddlewareController');
 const router = express.Router()
 
-router.get('/', redisController.getRedis);
+router.post('/hold-seat', redisController.holdSeat);
+router.get('/all-hold', redisController.allHold);
+router.delete('/cancel-hold', redisController.cancelHold);
 
 module.exports = router
