@@ -12,8 +12,8 @@ const momoPost = async (req, res, urlRedirectUrl, urlIpnUrl) => {
     //parameters
     var orderInfo = 'Thanh toán với MoMo';
     var partnerCode = 'MOMO';
-    var redirectUrl = `http://localhost:3002/${urlRedirectUrl}`;
-    var ipnUrl = `https://7d28-113-161-208-38.ngrok-free.app/api/momo/${urlIpnUrl}`;
+    var redirectUrl = `${urlRedirectUrl}`;
+    var ipnUrl = `https://086d-14-237-179-233.ngrok-free.app/api/momo/${urlIpnUrl}`;
     var requestType = "payWithMethod";
     var amount = req.body.amount;
     var orderId = 'CINE' + new Date().getTime();
@@ -78,8 +78,9 @@ const momoPost = async (req, res, urlRedirectUrl, urlIpnUrl) => {
     }
 }
 
-const momoTicket = async (req, res) => momoPost(req, res, 'book-tickets/success', 'callback-ticket')
-const momoCombo = async (req, res) => momoPost(req, res, 'order-food/success', 'callback-combo')
+const momoTicket = async (req, res) => momoPost(req, res, 'http://localhost:3002/book-tickets/success', 'callback-ticket')
+const momoCombo = async (req, res) => momoPost(req, res, 'http://localhost:3002/order-food/success', 'callback-combo')
+const momoTicketCustomer = async (req, res) => momoPost(req, res, 'http://localhost:3000/checkout', 'callback-ticket')
 
 const callback = async (req, res, model) => {
     console.log("callback:")
@@ -145,4 +146,5 @@ module.exports = {
     callbackTicket,
     callbackCombo,
     checkStatus,
+    momoTicketCustomer
 }
