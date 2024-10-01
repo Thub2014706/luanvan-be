@@ -72,6 +72,24 @@ const methodPay = {
     1: 'Thanh toán tiền mặt',
 };
 
+const standardAge = [
+    'P - Thích hợp cho mọi độ tuổi',
+    'K - Người xem dưới 13 tuổi với điều kiện xem cùng cha mẹ hoặc người giám hộ',
+    'T13 - Cấm người dưới 13 tuổi',
+    'T16 - Cấm người dưới 16 tuổi',
+    'T18 - Cấm người dưới 18 tuổi',
+    'C - Phim không được phép phổ biến',
+];
+
+const signAge = [
+    'P',
+    'K',
+    'T13',
+    'T16',
+    'T18',
+    'C',
+];
+
 module.exports = {
     typeSeatEnum,
     allAccess,
@@ -82,5 +100,7 @@ module.exports = {
     typeRoom,
     typeSurcharge,
     typePay,
-    methodPay
+    methodPay,
+    standardAge,
+    signAge
 };
