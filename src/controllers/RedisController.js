@@ -50,6 +50,38 @@ const holdSeat = async (req, res) => {
     }
 };
 
+const testHold = async (req, res) => {
+    const { seatId, showTime } = req.query;
+    const reservationKey = `showTime:${showTime}`;
+    const seatArray = seatId.split(',');
+    console.log(seatArray)
+    try {
+        const seatsAlreadyHeld = [];
+        await Promise.all(seatArray.map(async item => {
+            const result = await client.hGet(reservationKey, item);
+
+            if (result) {
+                seatsAlreadyHeld.push(item);
+            }
+        }))
+
+        if (seatsAlreadyHeld.length > 0) {
+            return res.status(400).json({
+                message: `Ghế này đã được mua. Vui lòng chọn ghế khác.`
+            });
+        } else {
+            return res.status(200).json({
+                message: 'OK'
+            });
+        }
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({
+            message: "Đã có lỗi xảy ra",
+        })
+    }
+}
+
 const allHold = async (req, res) => {
     const { showTime } = req.query;
     const reservationKey = `showTime:${showTime}`;
@@ -190,6 +222,7 @@ const holdPay = async (req, res) => {
 
 module.exports = {
     holdSeat,
+    testHold,
     allHold,
     cancelHold,
     cancelAllHold,

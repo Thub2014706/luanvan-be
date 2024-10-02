@@ -175,7 +175,7 @@ const allShowTime = async (req, res) => {
     }
 }
 
-cron.schedule(`0 0,5,10,15,20,25,30,35,40,45,50,55 0,1,2,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23 * * *`, async () => {
+cron.schedule(`0 0,5,10,15,20,25,30,35,40,45,50,55,59 0,1,2,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23 * * *`, async () => {
     try {
         const data1 = await ShowTimeModel.find({status: typeSchedule[2]})
         await Promise.all(data1.map(async item => {
@@ -184,10 +184,12 @@ cron.schedule(`0 0,5,10,15,20,25,30,35,40,45,50,55 0,1,2,6,7,8,9,10,11,12,13,14,
 
             const hours = now.getHours();
             const minutes = now.getMinutes();
-            if (item.date.setUTCHours(0, 0, 0, 0) === now.setUTCHours(0, 0, 0, 0)) {
-                if (hours === hoursStart && minutes === minutesStart) {
+            if (item.date.setUTCHours(0, 0, 0, 0) < now.setUTCHours(0, 0, 0, 0)) {
+                await ShowTimeModel.findByIdAndUpdate(item._id, {status: typeSchedule[0]}, {new: true})
+            } else if (item.date.setUTCHours(0, 0, 0, 0) === now.setUTCHours(0, 0, 0, 0)) {
+                if (hours >= hoursStart && minutes >= minutesStart) {
                     await ShowTimeModel.findByIdAndUpdate(item._id, {status: typeSchedule[1]}, {new: true})
-                }
+                }   
             }
         }))
         const data2 = await ShowTimeModel.find({status: typeSchedule[1]})
@@ -197,8 +199,10 @@ cron.schedule(`0 0,5,10,15,20,25,30,35,40,45,50,55 0,1,2,6,7,8,9,10,11,12,13,14,
 
             const hours = now.getHours();
             const minutes = now.getMinutes();
-            if (item.date.setUTCHours(0, 0, 0, 0) === now.setUTCHours(0, 0, 0, 0)) {
-                if (hours === hoursEnd && minutes === minutesEnd) {
+            if (item.date.setUTCHours(0, 0, 0, 0) < now.setUTCHours(0, 0, 0, 0)) {
+                await ShowTimeModel.findByIdAndUpdate(item._id, {status: typeSchedule[0]}, {new: true})
+            } else if (item.date.setUTCHours(0, 0, 0, 0) === now.setUTCHours(0, 0, 0, 0)) {
+                if (hours >= hoursEnd && minutes >= minutesEnd) {
                     await ShowTimeModel.findByIdAndUpdate(item._id, {status: typeSchedule[0]}, {new: true})
                 }
             }

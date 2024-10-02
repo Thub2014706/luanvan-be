@@ -17,40 +17,9 @@ const addOrderCombo = async (req, res) => {
         } else {
             status = typePay[1]
         }
-        if (member !== '') {
+        if (member.toString() !== '' && status === typePay[1]) {
             const user = await UserModel.findById(member)
-            const allOrderTicket = await OrderTicketModel.find({member: member})
-            const allOrderCombo = await OrderComboModel.find({member: member})
-            const allOrder = [...allOrderTicket, ...allOrderCombo]
-            if (user.level === 1) {
-                const sumPoint = user.point + (0.03 * price)
-                let getPoint
-                if (sumPoint % 1000 >= 1 && sumPoint % 1000 <=499) {
-                    getPoint = sumPoint - sumPoint % 1000
-                } else {
-                    getPoint = sumPoint + (1000 - sumPoint % 1000)
-                }
-                await UserModel.findByIdAndUpdate({_id: member}, {point: getPoint}, {new: true})
-            } else {
-                const sumPoint = user.point + (0.04 * price)
-                let getPoint
-                if (sumPoint % 1000 >= 1 && sumPoint % 1000 <=499) {
-                    getPoint = sumPoint - sumPoint % 1000
-                } else {
-                    getPoint = sumPoint + (1000 - sumPoint % 1000)
-                }
-                await UserModel.findByIdAndUpdate({_id: member}, {point: getPoint}, {new: true})
-            }
-            
-            let sum = 0
-            allOrder.forEach(item => {
-                sum += item.price
-            })
-            // console.log('ee', sum)
-            if (user.level === 1 && sum + price >= 4000000) {
-                await UserModel.findByIdAndUpdate({_id: member}, {level: 2}, {new: true})
-            }
-            await UserModel.findByIdAndUpdate({_id: member}, {point: user.point - usePoint}, {new: true})
+            updateUserPoints(user, price)
         }
         const data = await OrderComboModel.create({
             idOrder: order, 

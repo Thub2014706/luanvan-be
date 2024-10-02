@@ -8,5 +8,6 @@ router.get('/all-hold', redisController.allHold);
 router.delete('/cancel-hold', redisController.cancelHold);
 router.delete('/cancel-all-hold', redisController.cancelAllHold);
 router.post('/hold-pay', redisController.holdPay);
+router.get('/test-hold', redisController.testHold);
 
 module.exports = router
