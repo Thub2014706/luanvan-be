@@ -7,6 +7,11 @@ const OrderTicketSchema = new mongoose.Schema({
     seat: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Seat', required: true}],
     price: { type: Number, required: true },
     usePoint: { type: Number },
+    discount: {
+        id: { type: mongoose.Schema.Types.ObjectId, ref: 'Discount'},
+        useDiscount: { type: Number },
+    },
+    // useDiscount: {type: Number},
     combo: { type: Array },
     member: { type: mongoose.Schema.Types.ObjectId, ref: 'User'},
     status: { type: String, required: true },

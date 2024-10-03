@@ -9,6 +9,7 @@ const ScheduleModel = require("../models/ScheduleModel")
 const StaffModel = require('../models/StaffModel')
 const RoomModel = require("../models/RoomModel")
 const FilmModel = require("../models/FilmModel")
+const DiscountModel = require("../models/DiscountModel")
 
 const updateUserPoints = async (user, price) => {
     const allOrderTicket = await OrderTicketModel.find({member: user._id})
@@ -35,7 +36,7 @@ const updateUserPoints = async (user, price) => {
 }
 
 const addOrderTicket = async (req, res) => {
-    const {showTime, idOrder, seat, staff, price, paymentMethod, member, combo, usePoint } = req.body
+    const {showTime, idOrder, seat, staff, price, paymentMethod, member, combo, usePoint, discount } = req.body
     try {
         let order
         if (!idOrder) {   
@@ -53,6 +54,9 @@ const addOrderTicket = async (req, res) => {
             const user = await UserModel.findById(member)
             updateUserPoints(user, price)
         }
+        if (discount) {
+            await DiscountModel.findByIdAndUpdate(discount.id, { $inc: { used: 1 } }, {new: true})
+        }
         const data = await OrderTicketModel.create({
             showTime, 
             idOrder: order, 
@@ -60,9 +64,12 @@ const addOrderTicket = async (req, res) => {
             staff, 
             price, 
             status, 
+            ...(discount && {discount}),
             ...(member !== '' && { member, usePoint } ),
             ...(combo.length > 0 && { combo } ),
         })
+        console.log(discount);
+        
 
         res.status(200).json(data)
     } catch (error) {

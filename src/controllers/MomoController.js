@@ -28,7 +28,7 @@ const momoPost = async (req, res, urlRedirectUrl, urlIpnUrl) => {
     var orderInfo = 'Thanh toán với MoMo';
     var partnerCode = 'MOMO';
     var redirectUrl = `${urlRedirectUrl}`;
-    var ipnUrl = `https://24e8-14-237-179-233.ngrok-free.app/api/momo/${urlIpnUrl}`;
+    var ipnUrl = `https://a5f7-14-237-179-233.ngrok-free.app/api/momo/${urlIpnUrl}`;
     var requestType = "payWithMethod";
     var amount = req.body.amount;
     var orderId = 'CINE' + new Date().getTime();
@@ -150,22 +150,34 @@ const callback = async (req, res, model) => {
                     }
     
                     let priceHTML = ''
-                    if (detailOrder.usePoint && detailOrder.usePoint > 0) {
+                    const point = (detailOrder.usePoint && detailOrder.usePoint > 0) ? detailOrder.usePoint : 0
+                    const disc = detailOrder.discount ? detailOrder.discount.useDiscount : 0
+                    if ((detailOrder.usePoint && detailOrder.usePoint > 0) || detailOrder.discount) {
                         priceHTML = `<tr>
                             <td style="width: 50%; text-align: right;">Tong</td>
                             <td style="width: 20%; text-align: right;">VND</td>
                             <td style="width: 30%; text-align: right;">
-                                ${(detailOrder.price + detailOrder.usePoint).toLocaleString('it-IT')}
+                                ${(detailOrder.price + point + disc).toLocaleString('it-IT')}
                             </td>
-                        </tr>
-                        <tr>
+                        </tr>`
+                    }
+                    priceHTML += (detailOrder.usePoint && detailOrder.usePoint > 0) ?    
+                        `<tr>
                             <td style="width: 50%; text-align: right;">Diem thanh toan</td>
                             <td style="width: 20%; text-align: right;">VND</td>
                             <td style="width: 30%; text-align: right;">
                                 -${detailOrder.usePoint.toLocaleString('it-IT')}
                             </td>
-                        </tr>`
-                    }
+                        </tr>` : ''
+
+                    priceHTML += (detailOrder.discount) ?    
+                    `<tr>
+                        <td style="width: 50%; text-align: right;">Ma khuyen mai</td>
+                        <td style="width: 20%; text-align: right;">VND</td>
+                        <td style="width: 30%; text-align: right;">
+                            -${detailOrder.discount.useDiscount.toLocaleString('it-IT')}
+                        </td>
+                    </tr>` : ''    
             
                     const canvas = createCanvas();
             

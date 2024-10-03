@@ -1,4 +1,4 @@
-const moment = require("moment")
+const moment = require("moment-timezone")
 const { typeShowTime, typeSchedule, typePay } = require("../constants")
 const FilmModel = require("../models/FilmModel")
 const TheaterModel = require("../models/TheaterModel")
@@ -367,8 +367,24 @@ const showTimeFilter = async (req, res) => {
                     );
                     
                     if (date) {
-                        showTimes = await ShowTimeModel.find({isDelete: false, schedule, theater, date, status: typeSchedule[2]})
-                        // console.log(showTimes)
+                        const listShow = await ShowTimeModel.find({isDelete: false, schedule, theater, date, status: typeSchedule[2]})
+                        await Promise.all(listShow.map(async item => {
+                            const selled = await OrderTicketModel.findOne({showTime: item._id, status: typePay[1]})
+                            const seats = await SeatModel.find({room: item.room, status: true, isDelete: false})
+
+                            // test thoi gian truoc 20p
+                            const currentDate = new Date();
+                            const minutes = currentDate.getMinutes();
+                            const hours = currentDate.getHours();
+                            const initialTime = moment.tz(item.timeStart, 'HH:mm', 'Asia/Ho_Chi_Minh');
+                            const newTime = initialTime.subtract(20, 'minutes');
+                            // console.log(newTime.hours())
+                            if (selled?.seat.length !== seats.length &&
+                                ((hours === newTime.hours() && minutes < newTime.minutes()) || (hours < newTime.hours()))
+                            ) {
+                                showTimes.push(item)
+                            }
+                        }))
                     }
                 }
 

@@ -130,10 +130,28 @@ const detailUserById = async (req, res) => {
     }
 }
 
+const updateAvatar = async (req, res) => {
+    const id = req.params.id
+    let avatar;
+    if (req.file) { 
+        avatar = req.file.filename;
+    }
+    try {
+        const data = await UserModel.findByIdAndUpdate(id, {avatar}, {new: true})
+        res.status(200).json(data)
+    } catch (error) {
+        console.log('ee', avatar)
+        res.status(500).json({
+            message: "Đã có lỗi xảy ra",
+        })
+    }
+}
+
 module.exports = {
     register,
     allUser,
     statusUser,
     detailUserByPhone,
-    detailUserById
+    detailUserById,
+    updateAvatar
 }
