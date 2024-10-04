@@ -150,10 +150,68 @@ const allOrderTicket = async (req, res) => {
     }
 }
 
+const sumPayByUser = async (req, res) => {
+    const id = req.params.id
+    try {
+        const allOrderTicket = await OrderTicketModel.find({member: id})
+        const allOrderCombo = await OrderComboModel.find({member: id})
+        const allOrder = [...allOrderTicket, ...allOrderCombo]
+        let sum = 0
+        allOrder.forEach(item => {
+            sum += item.price
+        })
+        res.status(200).json(sum)
+    } catch (error) {
+        console.log('ee', error, showTime)
+        res.status(500).json({
+            message: "Đã có lỗi xảy ra",
+        })
+    }
+}
+
+const allOrderByUser = async (req, res) => {
+    const id = req.params.id
+    try {
+        const allOrderTicket = await OrderTicketModel.find({member: id})
+        const allOrderCombo = await OrderComboModel.find({member: id})
+        const allOrder = [...allOrderTicket, ...allOrderCombo]
+        const data = await Promise.all(allOrder.map(async item => {
+            let showTime 
+            let film
+            let seats
+            let room
+            let theater
+            if (item.showTime && item.seat) {
+                showTime = await ShowTimeModel.findById(item.showTime)
+                const schedule = await ScheduleModel.findById(showTime.schedule)
+                film = await FilmModel.findById(schedule.film)
+                const theaterInfo = await TheaterModel.findById(showTime.theater)
+                theater = theaterInfo.name
+                seats = await Promise.all(item.seat.map(async mini => {
+                    return await SeatModel.findById(mini)
+                }))
+                const roomInfo = await RoomModel.findById(showTime.room)
+                room = roomInfo.name
+
+            }
+            return {item, showTime, film, seats, room, theater}
+        }))
+        
+        res.status(200).json(data)
+    } catch (error) {
+        console.log('ee', error, showTime)
+        res.status(500).json({
+            message: "Đã có lỗi xảy ra",
+        })
+    }
+}
+
 module.exports = {
     addOrderTicket,
     detailOrderTicket,
     allOrderTicketSelled,
     allOrderTicket,
-    updateUserPoints
+    updateUserPoints,
+    sumPayByUser,
+    allOrderByUser
 }

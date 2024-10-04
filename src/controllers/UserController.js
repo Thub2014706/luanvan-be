@@ -136,6 +136,8 @@ const updateAvatar = async (req, res) => {
     if (req.file) { 
         avatar = req.file.filename;
     }
+    console.log(avatar);
+    
     try {
         const data = await UserModel.findByIdAndUpdate(id, {avatar}, {new: true})
         res.status(200).json(data)

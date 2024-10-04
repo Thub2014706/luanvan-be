@@ -8,6 +8,7 @@ router.get('/detail', orderTicketController.detailOrderTicket);
 router.get('/all-selled', orderTicketController.allOrderTicketSelled);
 router.get('/', orderTicketController.allOrderTicket);
 // router.delete('/:id', middlewares.performerAccuracy, performerController.deletePerformer);
-// router.get('/list', performerController.listPerfomer);
+router.get('/sum-by-user/:id', orderTicketController.sumPayByUser);
+router.get('/order-by-user/:id', orderTicketController.allOrderByUser);
 
 module.exports = router
