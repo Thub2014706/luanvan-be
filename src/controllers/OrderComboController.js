@@ -1,6 +1,10 @@
 const { typePay } = require("../constants")
+const ComboModel = require("../models/ComboModel")
+const FoodModel = require("../models/FoodModel")
 const OrderComboModel = require("../models/OrderComboModel")
+const TheaterModel = require("../models/TheaterModel")
 const UserModel = require("../models/UserModel")
+const { updateUserPoints } = require("./OrderTicketController")
 
 const addOrderCombo = async (req, res) => {
     const { idOrder, staff, price, paymentMethod, member, combo, usePoint, theater } = req.body
@@ -53,7 +57,40 @@ const detailOrderCombo = async (req, res) => {
     }
 }
 
+const allOrderByUser = async (req, res) => {
+    const id = req.params.id
+    try {
+        const allOrderCombo = await OrderComboModel.find({member: id}).sort({createdAt: -1});
+        const data = await Promise.all(allOrderCombo.map(async item => {
+            let theater
+
+            const theaterInfo = await TheaterModel.findById(item.theater)
+            theater = theaterInfo.name
+            const combo = await Promise.all(item.combo.map(async mini => {
+                const com = await ComboModel.findById(mini.id) || await FoodModel.findById(mini.id)
+                if (com.variants) {
+                    const foods = await Promise.all(com.variants.map(async min => {
+                        const nameFood = await FoodModel.findById(min.food)
+                        return {min, nameFood}
+                    }))
+                    return {...mini, detail: com, foods}
+                } else return {...mini, detail: com}
+            }))
+            return {item, theater, combo}
+
+        }))
+        
+        res.status(200).json(data)
+    } catch (error) {
+        console.log('ee', error)
+        res.status(500).json({
+            message: "Đã có lỗi xảy ra",
+        })
+    }
+}
+
 module.exports = {
     addOrderCombo,
-    detailOrderCombo
+    detailOrderCombo,
+    allOrderByUser
 }

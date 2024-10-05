@@ -112,9 +112,9 @@ const allOrderTicketSelled = async (req, res) => {
 const allOrderTicket = async (req, res) => {
     const {theater, number, show} = req.query
     try {
-        const data1 = await OrderTicketModel.find({status: typePay[1]}).sort({createdAt: -1})
-        const data2 = await OrderComboModel.find({status: typePay[1]}).sort({createdAt: -1})
-        const data = [...data1, ...data2]
+        const data1 = await OrderTicketModel.find({status: typePay[1]})
+        const data2 = await OrderComboModel.find({status: typePay[1]})
+        const data = [...data1, ...data2].sort((a, b) => b.createdAt - a.createdAt)
         let getData
         if (theater) {
             getData = await Promise.all(data.map(async item => {
@@ -172,34 +172,30 @@ const sumPayByUser = async (req, res) => {
 const allOrderByUser = async (req, res) => {
     const id = req.params.id
     try {
-        const allOrderTicket = await OrderTicketModel.find({member: id})
-        const allOrderCombo = await OrderComboModel.find({member: id})
-        const allOrder = [...allOrderTicket, ...allOrderCombo]
-        const data = await Promise.all(allOrder.map(async item => {
+        const allOrderTicket = await OrderTicketModel.find({member: id}).sort({createdAt: -1});
+        const data = await Promise.all(allOrderTicket.map(async item => {
             let showTime 
             let film
             let seats
             let room
             let theater
-            if (item.showTime && item.seat) {
-                showTime = await ShowTimeModel.findById(item.showTime)
-                const schedule = await ScheduleModel.findById(showTime.schedule)
-                film = await FilmModel.findById(schedule.film)
-                const theaterInfo = await TheaterModel.findById(showTime.theater)
-                theater = theaterInfo.name
-                seats = await Promise.all(item.seat.map(async mini => {
-                    return await SeatModel.findById(mini)
-                }))
-                const roomInfo = await RoomModel.findById(showTime.room)
-                room = roomInfo.name
+            showTime = await ShowTimeModel.findById(item.showTime)
+            const schedule = await ScheduleModel.findById(showTime.schedule)
+            film = await FilmModel.findById(schedule.film)
+            const theaterInfo = await TheaterModel.findById(showTime.theater)
+            theater = theaterInfo.name
+            seats = await Promise.all(item.seat.map(async mini => {
+                return await SeatModel.findById(mini)
+            }))
+            room = await RoomModel.findById(showTime.room)
 
-            }
             return {item, showTime, film, seats, room, theater}
+
         }))
         
         res.status(200).json(data)
     } catch (error) {
-        console.log('ee', error, showTime)
+        console.log('ee', error)
         res.status(500).json({
             message: "Đã có lỗi xảy ra",
         })
