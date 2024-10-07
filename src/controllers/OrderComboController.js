@@ -1,5 +1,6 @@
 const { typePay } = require("../constants")
 const ComboModel = require("../models/ComboModel")
+const DiscountModel = require("../models/DiscountModel")
 const FoodModel = require("../models/FoodModel")
 const OrderComboModel = require("../models/OrderComboModel")
 const TheaterModel = require("../models/TheaterModel")
@@ -7,7 +8,7 @@ const UserModel = require("../models/UserModel")
 const { updateUserPoints } = require("./OrderTicketController")
 
 const addOrderCombo = async (req, res) => {
-    const { idOrder, staff, price, paymentMethod, member, combo, usePoint, theater } = req.body
+    const { idOrder, staff, price, paymentMethod, member, combo, usePoint, theater, discount } = req.body
     try {
         let order
         if (!idOrder) {   
@@ -24,12 +25,16 @@ const addOrderCombo = async (req, res) => {
         if (member.toString() !== '' && status === typePay[1]) {
             const user = await UserModel.findById(member)
             updateUserPoints(user, price)
+            if (discount) {
+                await DiscountModel.findByIdAndUpdate(discount.id, { $inc: { used: 1 } }, {new: true})
+            }
         }
         const data = await OrderComboModel.create({
             idOrder: order, 
             staff, 
             price, 
             status, 
+            ...(discount && {discount}),
             ...(member !== '' && { member, usePoint } ),
             ...(combo.length > 0 && { combo } ),
             theater
@@ -37,7 +42,7 @@ const addOrderCombo = async (req, res) => {
         
         res.status(200).json(data)
     } catch (error) {
-        console.log('ee', error)
+        console.log('eEe', error)
         res.status(500).json({
             message: "Đã có lỗi xảy ra",
         })

@@ -3,7 +3,7 @@ const orderComboController = require('../controllers/OrderComboController')
 const middlewares = require('../controllers/MiddlewareController');
 const router = express.Router()
 
-router.post('/', middlewares.orderComboAccuracy, orderComboController.addOrderCombo);
+router.post('/', orderComboController.addOrderCombo);
 // router.put('/:id', middlewares.performerAccuracy,  performerController.updatePerformer);
 router.get('/detail', orderComboController.detailOrderCombo);
 router.get('/order-by-user/:id', orderComboController.allOrderByUser);

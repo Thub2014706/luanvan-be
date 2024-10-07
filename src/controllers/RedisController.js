@@ -54,7 +54,7 @@ const testHold = async (req, res) => {
     const { seatId, showTime } = req.query;
     const reservationKey = `showTime:${showTime}`;
     const seatArray = seatId.split(',');
-    console.log(seatArray)
+    // console.log(seatArray)
     try {
         const seatsAlreadyHeld = [];
         await Promise.all(seatArray.map(async item => {
@@ -167,7 +167,7 @@ const cancelAllHold = async (req, res) => {
             
             const seatsToRemove = Object.keys(seats).filter(seat => seats[seat] === userId);
 
-            console.log('yyyy',seatsToRemove);
+            // console.log('yyyy',seatsToRemove);
             await Promise.all(seatsToRemove.map(async item => {
                 await client.hDel(showTime, item);
                 removedSeats.push(...seatsToRemove); 

@@ -135,8 +135,8 @@ const listDiscount = async (req, res) => {
             return item.quantity - item.used > 0 ? item : null
         })
         const filter = bigData.filter(item => item !== null)
-        console.log(filter);
-        res.status(200).json(data)
+        // console.log(filter);
+        res.status(200).json(filter)
     } catch (error) {
         console.log(error);
         res.status(500).json({

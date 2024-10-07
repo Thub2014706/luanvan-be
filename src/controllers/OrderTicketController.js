@@ -53,9 +53,9 @@ const addOrderTicket = async (req, res) => {
         if (member.toString() !== '' && status === typePay[1]) {
             const user = await UserModel.findById(member)
             updateUserPoints(user, price)
-        }
-        if (discount) {
-            await DiscountModel.findByIdAndUpdate(discount.id, { $inc: { used: 1 } }, {new: true})
+            if (discount) {
+                await DiscountModel.findByIdAndUpdate(discount.id, { $inc: { used: 1 } }, {new: true})
+            }
         }
         const data = await OrderTicketModel.create({
             showTime, 
@@ -68,7 +68,7 @@ const addOrderTicket = async (req, res) => {
             ...(member !== '' && { member, usePoint } ),
             ...(combo.length > 0 && { combo } ),
         })
-        console.log(discount);
+        // console.log(discount);
         
 
         res.status(200).json(data)
