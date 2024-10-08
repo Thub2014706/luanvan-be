@@ -10,10 +10,11 @@ const StaffModel = require('../models/StaffModel')
 const RoomModel = require("../models/RoomModel")
 const FilmModel = require("../models/FilmModel")
 const DiscountModel = require("../models/DiscountModel")
+const TicketRefundModel = require("../models/TicketRefundModel")
 
 const updateUserPoints = async (user, price) => {
-    const allOrderTicket = await OrderTicketModel.find({member: user._id})
-    const allOrderCombo = await OrderComboModel.find({member: user._id})
+    const allOrderTicket = await OrderTicketModel.find({member: user._id, status: typePay[1]})
+    const allOrderCombo = await OrderComboModel.find({member: user._id, status: typePay[1]})
     const allOrder = [...allOrderTicket, ...allOrderCombo]
     let pointMultiplier = user.level === 1 ? 0.05 : 0.07;
     const sumPoint = user.point + (pointMultiplier * price)
@@ -29,7 +30,11 @@ const updateUserPoints = async (user, price) => {
     allOrder.forEach(item => {
         sum += item.price
     })
-    // console.log('ee', sum)
+    const listRefund = await TicketRefundModel.find({user: user._id})
+    await Promise.all(listRefund.map(async item => {
+        const order = await OrderTicketModel.findById(item.order)
+        sum -= order.price
+    }))
     if (user.level === 1 && sum + price >= 4000000) {
         await UserModel.findByIdAndUpdate({_id: user._id}, {level: 2}, {new: true})
     }
@@ -173,7 +178,10 @@ const allOrderByUser = async (req, res) => {
     const id = req.params.id
     try {
         const allOrderTicket = await OrderTicketModel.find({member: id}).sort({createdAt: -1});
-        const data = await Promise.all(allOrderTicket.map(async item => {
+        const refund = await TicketRefundModel.find({user: id})
+        const orderRefund = refund.map(item => item.order)
+        const allFilter = allOrderTicket.filter(item => !refund.find(mini => mini === item._id))
+        const data = await Promise.all(allFilter.map(async item => {
             let showTime 
             let film
             let seats

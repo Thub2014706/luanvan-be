@@ -20,7 +20,8 @@ const allAccess = {
     12: 'Suất chiếu',
     13: 'Đặt vé',
     14: 'Đặt combo, bắp nước',
-    15: 'Danh sách vé'
+    15: 'Danh sách vé',
+    16: 'In vé'
 }
 
 const typeSurcharge = {
@@ -90,6 +91,11 @@ const signAge = [
     'C',
 ];
 
+const statusTicket = {
+    0: 'Vé không hợp lệ',
+    1: 'Vé hợp lệ',
+}
+
 module.exports = {
     typeSeatEnum,
     allAccess,
@@ -102,5 +108,6 @@ module.exports = {
     typePay,
     methodPay,
     standardAge,
-    signAge
+    signAge,
+    statusTicket
 };

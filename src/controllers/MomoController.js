@@ -29,7 +29,7 @@ const momoPost = async (req, res, urlRedirectUrl, urlIpnUrl) => {
     var orderInfo = 'Thanh toán với MoMo';
     var partnerCode = 'MOMO';
     var redirectUrl = `${urlRedirectUrl}`;
-    var ipnUrl = `https://105d-113-166-151-112.ngrok-free.app/api/momo/${urlIpnUrl}`;
+    var ipnUrl = `https://6e96-113-166-151-112.ngrok-free.app/api/momo/${urlIpnUrl}`;
     var requestType = "payWithMethod";
     var amount = req.body.amount;
     var orderId = 'CINE' + new Date().getTime();
@@ -51,7 +51,7 @@ const momoPost = async (req, res, urlRedirectUrl, urlIpnUrl) => {
         .update(rawSignature)
         .digest('hex');
     // console.log("--------------------SIGNATURE----------------")
-    // console.log(signature)
+    console.log(signature)
 
     //json object send to MoMo endpoint
     const requestBody = JSON.stringify({

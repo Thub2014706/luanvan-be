@@ -214,6 +214,9 @@ const orderTicketAccuracy = accuracy(allAccess[13])
 // người dùng là admin hoặc ordercombo
 const orderComboAccuracy = accuracy(allAccess[14])
 
+// người dùng là admin hoặc print
+const printAccuracy = accuracy(allAccess[16])
+
 module.exports = { 
     userAccuracy, 
     userAdminAccuracy, 
@@ -232,5 +235,6 @@ module.exports = {
     scheduleAccuracy,
     showTimeAccuracy,
     orderTicketAccuracy,
-    orderComboAccuracy
+    orderComboAccuracy,
+    printAccuracy
 }

@@ -18,6 +18,8 @@ const momoRouter = require('./MomoRouter')
 const orderTicketRouter = require('./OrderTicketRouter')
 const orderComboRouter = require('./OrderComboRouter')
 const redisRouter = require('./RedisRouter')
+const printTicketRouter = require('./PrintTicketRouter')
+const ticketRefundRouter = require('./TicketRefundRouter')
 
 const routes = (app) => {
     app.use('/api/user/', userRouter)
@@ -40,6 +42,8 @@ const routes = (app) => {
     app.use('/api/order-ticket/', orderTicketRouter)
     app.use('/api/order-combo/', orderComboRouter)
     app.use('/api/redis/', redisRouter)
+    app.use('/api/print-ticket/', printTicketRouter)
+    app.use('/api/ticket-refund/', ticketRefundRouter)
 
 }
 

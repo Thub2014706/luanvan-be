@@ -380,7 +380,10 @@ const showTimeFilter = async (req, res) => {
                             const newTime = initialTime.subtract(20, 'minutes');
                             // console.log(newTime.hours())
                             if (selled?.seat.length !== seats.length &&
-                                ((hours === newTime.hours() && minutes < newTime.minutes()) || (hours < newTime.hours()))
+                                (new Date(item.date) > currentDate.setUTCHours(0, 0, 0, 0) ||
+                                    (hours === newTime.hours() && minutes < newTime.minutes()) || 
+                                    (hours < newTime.hours())
+                                )
                             ) {
                                 showTimes.push(item)
                             }
