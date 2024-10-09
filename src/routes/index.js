@@ -20,6 +20,8 @@ const orderComboRouter = require('./OrderComboRouter')
 const redisRouter = require('./RedisRouter')
 const printTicketRouter = require('./PrintTicketRouter')
 const ticketRefundRouter = require('./TicketRefundRouter')
+const commentRouter = require('./CommentRouter')
+const statisticalRouter = require('./StatisticalRouter')
 
 const routes = (app) => {
     app.use('/api/user/', userRouter)
@@ -44,6 +46,8 @@ const routes = (app) => {
     app.use('/api/redis/', redisRouter)
     app.use('/api/print-ticket/', printTicketRouter)
     app.use('/api/ticket-refund/', ticketRefundRouter)
+    app.use('/api/comment/', commentRouter)
+    app.use('/api/statistical/', statisticalRouter)
 
 }
 

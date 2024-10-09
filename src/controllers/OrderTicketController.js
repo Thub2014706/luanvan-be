@@ -117,7 +117,13 @@ const allOrderTicketSelled = async (req, res) => {
 const allOrderTicket = async (req, res) => {
     const {theater, number, show} = req.query
     try {
-        const data1 = await OrderTicketModel.find({status: typePay[1]})
+        const orderTicket = await OrderTicketModel.find({status: typePay[1]})
+        const refund = await TicketRefundModel.find({})
+        // console.log(refund[0].order,  allOrderTicket[0]._id);
+        
+        const data1 = orderTicket.filter(item => {
+            return !refund.some(mini => mini.order.equals(item._id));
+        });
         const data2 = await OrderComboModel.find({status: typePay[1]})
         const data = [...data1, ...data2].sort((a, b) => b.createdAt - a.createdAt)
         let getData
@@ -179,8 +185,12 @@ const allOrderByUser = async (req, res) => {
     try {
         const allOrderTicket = await OrderTicketModel.find({member: id}).sort({createdAt: -1});
         const refund = await TicketRefundModel.find({user: id})
-        const orderRefund = refund.map(item => item.order)
-        const allFilter = allOrderTicket.filter(item => !refund.find(mini => mini === item._id))
+        // console.log(refund[0].order,  allOrderTicket[0]._id);
+        
+        const allFilter = allOrderTicket.filter(item => {
+            return !refund.some(mini => mini.order.equals(item._id));
+        });
+        
         const data = await Promise.all(allFilter.map(async item => {
             let showTime 
             let film

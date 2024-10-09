@@ -5,5 +5,6 @@ const router = express.Router()
 
 router.post('/', ticketRefundController.addTicketRefund);
 router.get('/:id', ticketRefundController.allTicketRefund);
+router.get('/refund-by-order/:id', ticketRefundController.ticketRefundByOrder);
 
 module.exports = router

@@ -109,7 +109,22 @@ const allTicketRefund = async (req, res) => {
     }
 }
 
+const ticketRefundByOrder = async (req, res) => {
+    const { id } = req.params
+
+    try {        
+        const data = await TicketRefundModel.findOne({order: id})
+        res.status(200).json(data)
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({
+            message: "Đã có lỗi xảy ra",
+        })
+    }
+}
+
 module.exports = {
     addTicketRefund,
-    allTicketRefund
+    allTicketRefund,
+    ticketRefundByOrder
 }
