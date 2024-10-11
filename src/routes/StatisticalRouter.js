@@ -13,5 +13,6 @@ router.get('/seven-day-ticket', statisticalController.sDayTicket);
 router.get('/seven-day-combo', statisticalController.sDayCombo);
 router.get('/film-revenue', statisticalController.filmRevenue);
 router.get('/theater-revenue', statisticalController.theaterRevenue);
+router.get('/theater-combo-revenue', statisticalController.theaterComboRevenue);
 
 module.exports = router

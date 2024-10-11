@@ -96,6 +96,13 @@ const statusTicket = {
     1: 'Vé hợp lệ',
 }
 
+const typeStatistical = {
+    0: '7 ngày gần nhất',
+    1: 'Tháng này',
+    2: 'Tháng trước',
+    3: 'Trong năm'
+}
+
 module.exports = {
     typeSeatEnum,
     allAccess,
@@ -109,5 +116,6 @@ module.exports = {
     methodPay,
     standardAge,
     signAge,
-    statusTicket
+    statusTicket,
+    typeStatistical
 };

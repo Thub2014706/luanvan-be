@@ -1,4 +1,4 @@
-const { typePay } = require("../constants")
+const { typePay, typeStatistical } = require("../constants")
 const FilmModel = require("../models/FilmModel")
 const OrderComboModel = require("../models/OrderComboModel")
 const OrderTicketModel = require("../models/OrderTicketModel")
@@ -45,8 +45,13 @@ const dailyRevenue = async (req, res) => {
 
 const totalTicket = async (req, res) => {
     try {
-        const arrayData = await array();
-        res.status(200).json(arrayData.data2.length)
+        const arrayData = await array()
+        const arraySort = arrayData.data2.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+        res.status(200).json({
+            startDate: arraySort[0].createdAt,
+            endDate: arraySort[arrayData.data2.length - 1].createdAt,
+            total: arrayData.data2.length
+        })
     } catch (error) {
         console.log(error)
         res.status(500).json({
@@ -59,8 +64,13 @@ const totalRevenue = async (req, res) => {
     try {
         const arrayData = await array();
         const total = [...arrayData.data1, ...arrayData.data2].reduce((sum, item) => sum + item.price, 0)
+        const arraySort = [...arrayData.data1, ...arrayData.data2].sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
 
-        res.status(200).json(total)
+        res.status(200).json({
+            startDate: arraySort[0].createdAt,
+            endDate: arraySort[[...arrayData.data1, ...arrayData.data2].length - 1].createdAt,
+            total
+        })
     } catch (error) {
         console.log(error)
         res.status(500).json({
@@ -74,7 +84,6 @@ const newUser = async (req, res) => {
     try {
         const users = await UserModel.find({})
         const newToDay = users.filter(item => {
-            
             if (new Date(item.createdAt).setUTCHours(0, 0, 0, 0) === new Date().setUTCHours(0, 0, 0, 0)) {
                 return item
             }
@@ -89,23 +98,109 @@ const newUser = async (req, res) => {
 }
 
 const sDayRevenueTicket = async (req, res) => {
+    const { type, start, end } = req.query
+    
     try {
-        const startDate = new Date()
-        const endDate = new Date()
-        startDate.setDate((startDate.getDate() - 6))
-        const orders = await array()
         let revenueByDay = {}
-        for (let date = startDate; date <= endDate; date.setDate(date.getDate() + 1)) {
-            const data = orders.data2.filter(item => {
-                if (new Date(item.createdAt).toDateString() === new Date(date).toDateString()) {
-                    return item
+        if (type === '') {
+            const milli = 1000 * 60 * 60 * 24;
+
+            const diffInDays = (new Date(end) - new Date(start)) / milli;
+
+            if (diffInDays > 30) {
+                return res.status(400).json({
+                    message: "Ngày bắt đầu và ngày kết thúc không được lớn hơn 31 ngày",
+                });
+            }
+            if (new Date(start) > new Date(end)) {
+                return res.status(400).json({
+                    message: "Ngày kết thúc không được lớn hơn ngày bắt đầu",
+                })
+            }
+            const orders = await array()
+            for (let date = new Date(start); date <= new Date(end); date.setDate(date.getDate() + 1)) {
+                const data = orders.data2.filter(item => {
+                    if (new Date(item.createdAt).toDateString() === new Date(date).toDateString()) {
+                        return item
+                    }
+                })
+                    
+                const total = data.reduce((sum, item) => {
+                    const discount = item.discount && item.discount.useDiscount > 0 ? item.discount.useDiscount : 0
+                    const point = item.usePoint ? usePoint : 0
+                    const original = item.price + point + discount
+                    const comboPrice = item.combo.length > 0
+                        ? item.combo.reduce((comboSum, com) => comboSum + com.price * com.quantity, 0)
+                        : 0;
+                    const film = original - comboPrice
+                    
+                    return sum + (film - (film / original) * (discount + point))
+                }, 0)
+                revenueByDay[date] = total
+            }
+        } else {
+            const startDate = new Date()
+            const endDate = new Date()
+            if (type === typeStatistical[3]) {
+                startDate.setMonth(0)
+                const orders = await array()
+    
+                for (let date = startDate.getMonth(); date <= endDate.getMonth(); date++) {
+                    const data = orders.data2.filter(item => {
+                        if (new Date(item.createdAt).getMonth() === date) {
+                            return item
+                        }
+                    })
+                     
+                    const total = data.reduce((sum, item) => {
+                        const discount = item.discount && item.discount.useDiscount > 0 ? item.discount.useDiscount : 0
+                        const point = item.usePoint ? usePoint : 0
+                        const original = item.price + point + discount
+                        const comboPrice = item.combo.length > 0
+                            ? item.combo.reduce((comboSum, com) => comboSum + com.price * com.quantity, 0)
+                            : 0;
+                        const film = original - comboPrice
+                        
+                        return sum + (film - (film / original) * (discount + point))
+                    }, 0)
+                    revenueByDay[date] = total
                 }
-            })
-            
-            const total = data.reduce((sum, item) => sum + item.price, 0)
-            revenueByDay[date] = total
+            } else {
+                if (type === typeStatistical[0]) {
+                    startDate.setDate((startDate.getDate() - 6))
+                } else if (type === typeStatistical[1]) {
+                    startDate.setDate(1)
+                    startDate.setDate(1)
+                } else if (type === typeStatistical[2]) {
+                    startDate.setDate(1)
+                    endDate.setDate(startDate.getDate() - 1)
+                    startDate.setMonth(startDate.getMonth() - 1)
+                }
+                const orders = await array()
+                for (let date = startDate; date <= endDate; date.setDate(date.getDate() + 1)) {
+                    const data = orders.data2.filter(item => {
+                        if (new Date(item.createdAt).toDateString() === new Date(date).toDateString()) {
+                            return item
+                        }
+                    })
+                        
+                    const total = data.reduce((sum, item) => {
+                        const discount = item.discount && item.discount.useDiscount > 0 ? item.discount.useDiscount : 0
+                        const point = item.usePoint ? usePoint : 0
+                        const original = item.price + point + discount
+                        const comboPrice = item.combo.length > 0
+                            ? item.combo.reduce((comboSum, com) => comboSum + com.price * com.quantity, 0)
+                            : 0;
+                        const film = original - comboPrice
+                        
+                        return sum + (film - (film / original) * (discount + point))
+                    }, 0)
+                    revenueByDay[date] = total
+                }
+            }
         }
-        // console.log(startDate, revenueByDay)
+        
+  
         res.status(200).json(revenueByDay)
     } catch (error) {
         console.log(error)
@@ -116,22 +211,129 @@ const sDayRevenueTicket = async (req, res) => {
 }
 
 const sDayRevenueCombo = async (req, res) => {
+    const {type, start, end}= req.query
     try {
-        const startDate = new Date()
-        const endDate = new Date()
-        startDate.setDate((startDate.getDate() - 6))
-        const orders = await array()
         let revenueByDay = {}
-        for (let date = startDate; date <= endDate; date.setDate(date.getDate() + 1)) {
-            const data = orders.data1.filter(item => {
-                if (new Date(item.createdAt).toDateString() === new Date(date).toDateString()) {
-                    return item
+        if (type === '') {
+            const milli = 1000 * 60 * 60 * 24;
+
+            const diffInDays = (new Date(end) - new Date(start)) / milli;
+
+            if (diffInDays > 30) {
+                return res.status(400).json({
+                    message: "Ngày bắt đầu và ngày kết thúc không được lớn hơn 31 ngày",
+                });
+            }
+            if (new Date(start) > new Date(end)) {
+                return res.status(400).json({
+                    message: "Ngày kết thúc không được lớn hơn ngày bắt đầu",
+                })
+            }
+            const orders = await array()
+            for (let date = new Date(start); date <= new Date(end); date.setDate(date.getDate() + 1)) {
+                const data1 = orders.data1.filter(item => {
+                    if (new Date(item.createdAt).toDateString() === new Date(date).toDateString()) {
+                        return item
+                    }
+                })
+                const total1 = data1.reduce((sum, item) => sum + item.price, 0)
+
+                const data2 = orders.data2.filter(item => {
+                    if (new Date(item.createdAt).toDateString() === new Date(date).toDateString()) {
+                        return item
+                    }
+                })
+
+                const total2 = data2.reduce((sum, item) => {
+                    const discount = item.discount && item.discount.useDiscount > 0 ? item.discount.useDiscount : 0
+                    const point = item.usePoint ? usePoint : 0
+                    const original = item.price + point + discount
+                    const comboPrice = item.combo.length > 0
+                        ? item.combo.reduce((comboSum, com) => comboSum + com.price * com.quantity, 0)
+                        : 0;
+                    
+                    return sum + (comboPrice - (comboPrice / original) * (discount + point))
+                }, 0)
+
+                revenueByDay[date] = total1 + total2
+            }
+        } else {
+            const startDate = new Date()
+            const endDate = new Date()
+            if (type === typeStatistical[3]) {
+                startDate.setMonth(0)
+                const orders = await array()
+                for (let date = startDate.getMonth(); date <= endDate.getMonth(); date++) {
+                    // console.log(date, endDate);
+                    
+                    const data1 = orders.data1.filter(item => {
+                        if (new Date(item.createdAt).getMonth() === date) {
+                            return item
+                        }
+                    })
+                    const total1 = data1.reduce((sum, item) => sum + item.price, 0)
+    
+                    const data2 = orders.data2.filter(item => {
+                        if (new Date(item.createdAt).getMonth() === date) {
+                            return item
+                        }
+                    })
+    
+                    const total2 = data2.reduce((sum, item) => {
+                        const discount = item.discount && item.discount.useDiscount > 0 ? item.discount.useDiscount : 0
+                        const point = item.usePoint ? usePoint : 0
+                        const original = item.price + point + discount
+                        const comboPrice = item.combo.length > 0
+                            ? item.combo.reduce((comboSum, com) => comboSum + com.price * com.quantity, 0)
+                            : 0;
+                        
+                        return sum + (comboPrice - (comboPrice / original) * (discount + point))
+                    }, 0)
+    
+                    revenueByDay[date] = total1 + total2
                 }
-            })
-            
-            const total = data.reduce((sum, item) => sum + item.price, 0)
-            revenueByDay[date] = total
+            } else {
+                if (type === typeStatistical[0]) {
+                    startDate.setDate((startDate.getDate() - 6))
+                } else if (type === typeStatistical[1]) {
+                    startDate.setDate(1)
+                    startDate.setDate(1)
+                } else if (type === typeStatistical[2]) {
+                    startDate.setDate(1)
+                    endDate.setDate(startDate.getDate() - 1)
+                    startDate.setMonth(startDate.getMonth() - 1)
+                }
+                const orders = await array()
+                for (let date = startDate; date <= endDate; date.setDate(date.getDate() + 1)) {
+                    const data1 = orders.data1.filter(item => {
+                        if (new Date(item.createdAt).toDateString() === new Date(date).toDateString()) {
+                            return item
+                        }
+                    })
+                    const total1 = data1.reduce((sum, item) => sum + item.price, 0)
+    
+                    const data2 = orders.data2.filter(item => {
+                        if (new Date(item.createdAt).toDateString() === new Date(date).toDateString()) {
+                            return item
+                        }
+                    })
+    
+                    const total2 = data2.reduce((sum, item) => {
+                        const discount = item.discount && item.discount.useDiscount > 0 ? item.discount.useDiscount : 0
+                        const point = item.usePoint ? usePoint : 0
+                        const original = item.price + point + discount
+                        const comboPrice = item.combo.length > 0
+                            ? item.combo.reduce((comboSum, com) => comboSum + com.price * com.quantity, 0)
+                            : 0;
+                        
+                        return sum + (comboPrice - (comboPrice / original) * (discount + point))
+                    }, 0)
+    
+                    revenueByDay[date] = total1 + total2
+                }
+            }
         }
+        
         // console.log(startDate, revenueByDay)
         res.status(200).json(revenueByDay)
     } catch (error) {
@@ -143,21 +345,73 @@ const sDayRevenueCombo = async (req, res) => {
 }
 
 const sDayCombo = async (req, res) => {
+    const { type, start, end } = req.query
     try {
-        const startDate = new Date()
-        const endDate = new Date()
-        startDate.setDate((startDate.getDate() - 6))
-        const orders = await array()
         let revenueByDay = {}
-        for (let date = startDate; date <= endDate; date.setDate(date.getDate() + 1)) {
-            const data = orders.data1.filter(item => {
-                if (new Date(item.createdAt).toDateString() === new Date(date).toDateString()) {
-                    return item
+        if (type === '') {
+            const milli = 1000 * 60 * 60 * 24;
+
+            const diffInDays = (new Date(end) - new Date(start)) / milli;
+
+            if (diffInDays > 30) {
+                return res.status(400).json({
+                    message: "Ngày bắt đầu và ngày kết thúc không được lớn hơn 31 ngày",
+                });
+            }
+            if (new Date(start) > new Date(end)) {
+                return res.status(400).json({
+                    message: "Ngày kết thúc không được lớn hơn ngày bắt đầu",
+                })
+            }
+            const orders = await array()
+            for (let date = new Date(start); date <= new Date(end); date.setDate(date.getDate() + 1)) {
+                const data = orders.data1.filter(item => {
+                    if (new Date(item.createdAt).toDateString() === new Date(date).toDateString()) {
+                        return item
+                    }
+                })
+                
+                revenueByDay[date] = data.length
+            }
+        } else {
+            const startDate = new Date()
+            const endDate = new Date()
+            if (type === typeStatistical[3]) {
+                startDate.setMonth(0)
+                const orders = await array()
+                for (let date = startDate.getMonth(); date <= endDate.getMonth(); date++) {
+                    const data = orders.data1.filter(item => {
+                        if (new Date(item.createdAt).getMonth() === date) {
+                            return item
+                        }
+                    })
+                    
+                    revenueByDay[date] = data.length
                 }
-            })
-            
-            revenueByDay[date] = data.length
+            } else {
+                if (type === typeStatistical[0]) {
+                    startDate.setDate((startDate.getDate() - 6))
+                } else if (type === typeStatistical[1]) {
+                    startDate.setDate(1)
+                    startDate.setDate(1)
+                } else if (type === typeStatistical[2]) {
+                    startDate.setDate(1)
+                    endDate.setDate(startDate.getDate() - 1)
+                    startDate.setMonth(startDate.getMonth() - 1)
+                }
+                const orders = await array()
+                for (let date = startDate; date <= endDate; date.setDate(date.getDate() + 1)) {
+                    const data = orders.data1.filter(item => {
+                        if (new Date(item.createdAt).toDateString() === new Date(date).toDateString()) {
+                            return item
+                        }
+                    })
+                    
+                    revenueByDay[date] = data.length
+                }
+            }
         }
+        
         res.status(200).json(revenueByDay)
     } catch (error) {
         console.log(error)
@@ -168,20 +422,71 @@ const sDayCombo = async (req, res) => {
 }
 
 const sDayTicket = async (req, res) => {
+    const { type, start, end } = req.query
     try {
-        const startDate = new Date()
-        const endDate = new Date()
-        startDate.setDate((startDate.getDate() - 6))
-        const orders = await array()
         let revenueByDay = {}
-        for (let date = startDate; date <= endDate; date.setDate(date.getDate() + 1)) {
-            const data = orders.data2.filter(item => {
-                if (new Date(item.createdAt).toDateString() === new Date(date).toDateString()) {
-                    return item
+        if (type === '') {
+            const milli = 1000 * 60 * 60 * 24;
+
+            const diffInDays = (new Date(end) - new Date(start)) / milli;
+
+            if (diffInDays > 30) {
+                return res.status(400).json({
+                    message: "Ngày bắt đầu và ngày kết thúc không được lớn hơn 31 ngày",
+                });
+            }
+            if (new Date(start) > new Date(end)) {
+                return res.status(400).json({
+                    message: "Ngày kết thúc không được lớn hơn ngày bắt đầu",
+                })
+            }
+            const orders = await array()
+            for (let date = new Date(start); date <= new Date(end); date.setDate(date.getDate() + 1)) {
+                const data = orders.data2.filter(item => {
+                    if (new Date(item.createdAt).toDateString() === new Date(date).toDateString()) {
+                        return item
+                    }
+                })
+                
+                revenueByDay[date] = data.length
+            }
+        } else {
+            const startDate = new Date()
+            const endDate = new Date()
+            if (type === typeStatistical[3]) {
+                startDate.setMonth(0)
+                const orders = await array()
+                for (let date = startDate.getMonth(); date <= endDate.getMonth(); date++) {
+                    const data = orders.data2.filter(item => {
+                        if (new Date(item.createdAt).getMonth() === date) {
+                            return item
+                        }
+                    })
+                    
+                    revenueByDay[date] = data.length
                 }
-            })
-            
-            revenueByDay[date] = data.length
+            } else {
+                if (type === typeStatistical[0]) {
+                    startDate.setDate((startDate.getDate() - 6))
+                } else if (type === typeStatistical[1]) {
+                    startDate.setDate(1)
+                    startDate.setDate(1)
+                } else if (type === typeStatistical[2]) {
+                    startDate.setDate(1)
+                    endDate.setDate(startDate.getDate() - 1)
+                    startDate.setMonth(startDate.getMonth() - 1)
+                }
+                const orders = await array()
+                for (let date = startDate; date <= endDate; date.setDate(date.getDate() + 1)) {
+                    const data = orders.data2.filter(item => {
+                        if (new Date(item.createdAt).toDateString() === new Date(date).toDateString()) {
+                            return item
+                        }
+                    })
+                    
+                    revenueByDay[date] = data.length
+                }
+            }
         }
         res.status(200).json(revenueByDay)
     } catch (error) {
@@ -222,7 +527,17 @@ const filmRevenue = async (req, res) => {
                 return !refund.some(ref => ref.order.equals(order._id));
             });
 
-            const total = filter.reduce((sum, order) => sum + order.price, 0)
+            const total = filter.reduce((sum, item) => {
+                const discount = item.discount && item.discount.useDiscount > 0 ? item.discount.useDiscount : 0
+                const point = item.usePoint ? usePoint : 0
+                const original = item.price + point + discount
+                const comboPrice = item.combo.length > 0
+                    ? item.combo.reduce((comboSum, com) => comboSum + com.price * com.quantity, 0)
+                    : 0;
+                const filmTotal = original - comboPrice
+                
+                return sum + (filmTotal - (filmTotal / original) * (discount + point))
+            }, 0)
             const numberTicket = filter.length
 
             return {item, total, numberTicket}
@@ -264,10 +579,74 @@ const theaterRevenue = async (req, res) => {
                 return !refund.some(ref => ref.order.equals(ord._id));
             });
 
-            const total = filter.reduce((sum, order) => sum + order.price, 0)
+            const total = filter.reduce((sum, item) => {
+                const discount = item.discount && item.discount.useDiscount > 0 ? item.discount.useDiscount : 0
+                const point = item.usePoint ? usePoint : 0
+                const original = item.price + point + discount
+                const comboPrice = item.combo.length > 0
+                    ? item.combo.reduce((comboSum, com) => comboSum + com.price * com.quantity, 0)
+                    : 0;
+                const filmTotal = original - comboPrice
+                
+                return sum + (filmTotal - (filmTotal / original) * (discount + point))
+            }, 0)
             const numberTicket = filter.length
 
             return {item, total, numberTicket}
+        }))
+        
+        res.status(200).json(data)
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({
+            message: "Đã có lỗi xảy ra",
+        })
+    }
+}
+
+const theaterComboRevenue = async (req, res) => {
+    const {theater} = req.query
+    try {
+        const theatersFirst = await TheaterModel.find({})
+        const theaters = theatersFirst.filter(item => {
+            return item.name
+            .toString()
+                    .normalize('NFD')
+                    .replace(/[\u0300-\u036f]/g, '')
+                    .toLowerCase()
+                    .includes(
+                        theater
+                            .normalize('NFD')
+                            .replace(/[\u0300-\u036f]/g, '')
+                            .toLowerCase(),
+                    )
+        })
+        const refund =  await TicketRefundModel.find({})
+        const data = await Promise.all(theaters.map(async item => {
+            const showTimes = await ShowTimeModel.find({theater: item._id})
+
+            const orders1 = await OrderTicketModel.find({showTime: { $in: showTimes.map(s => s._id)}, status: typePay[1]})
+
+            const filter = orders1.filter(ord => {
+                return !refund.some(ref => ref.order.equals(ord._id));
+            });
+
+            const total1 = filter.reduce((sum, item) => {
+                const discount = item.discount && item.discount.useDiscount > 0 ? item.discount.useDiscount : 0
+                const point = item.usePoint ? usePoint : 0
+                const original = item.price + point + discount
+                const comboPrice = item.combo.length > 0
+                    ? item.combo.reduce((comboSum, com) => comboSum + com.price * com.quantity, 0)
+                    : 0;
+                
+                return sum + (comboPrice - (comboPrice / original) * (discount + point))
+            }, 0)
+
+            const orders2 = await OrderComboModel.find({theater: item._id, status: typePay[1]})
+
+            const total2 = orders2.reduce((sum, order) => sum + order.price, 0)
+
+            return {item, total: total1 + total2}
         }))
         
         res.status(200).json(data)
@@ -349,4 +728,5 @@ module.exports = {
     sDayCombo,
     filmRevenue,
     theaterRevenue,
+    theaterComboRevenue
 }
