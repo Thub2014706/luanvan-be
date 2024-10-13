@@ -15,7 +15,7 @@ const register = async (req, res) => {
         })
     }
 
-    if (!username || !email || !password || !confirmPassword) {
+    if (!username || !email || !phone || !password || !confirmPassword) {
         return res.status(400).json({
             message: "Nhập đầy đủ thông tin"
         })

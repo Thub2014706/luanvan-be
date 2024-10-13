@@ -64,6 +64,7 @@ const detailOrderCombo = async (req, res) => {
 
 const allOrderByUser = async (req, res) => {
     const id = req.params.id
+    const {number} = req.query
     try {
         const allOrderCombo = await OrderComboModel.find({member: id}).sort({createdAt: -1});
         const data = await Promise.all(allOrderCombo.map(async item => {
@@ -85,7 +86,15 @@ const allOrderByUser = async (req, res) => {
 
         }))
         
-        res.status(200).json(data)
+        const start = (parseInt(number) - 1) * 5
+        const end = start + 5;
+        const newAll = data.slice(start, end);
+        const totalPages = Math.ceil(data.length / 5)
+        
+        res.status(200).json({
+            data: newAll,
+            length: totalPages
+        })
     } catch (error) {
         console.log('ee', error)
         res.status(500).json({

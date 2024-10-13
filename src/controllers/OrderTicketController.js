@@ -182,10 +182,10 @@ const sumPayByUser = async (req, res) => {
 
 const allOrderByUser = async (req, res) => {
     const id = req.params.id
+    const {number} = req.query
     try {
         const allOrderTicket = await OrderTicketModel.find({member: id}).sort({createdAt: -1});
         const refund = await TicketRefundModel.find({user: id})
-        // console.log(refund[0].order,  allOrderTicket[0]._id);
         
         const allFilter = allOrderTicket.filter(item => {
             return !refund.some(mini => mini.order.equals(item._id));
@@ -210,8 +210,16 @@ const allOrderByUser = async (req, res) => {
             return {item, showTime, film, seats, room, theater}
 
         }))
+
+        const start = (parseInt(number) - 1) * 5
+        const end = start + 5;
+        const newAll = data.slice(start, end);
+        const totalPages = Math.ceil(data.length / 5)
         
-        res.status(200).json(data)
+        res.status(200).json({
+            data: newAll,
+            length: totalPages
+        })
     } catch (error) {
         console.log('ee', error)
         res.status(500).json({

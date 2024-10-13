@@ -75,6 +75,7 @@ const addTicketRefund = async (req, res) => {
 
 const allTicketRefund = async (req, res) => {
     const { id } = req.params
+    const {number} = req.query
 
     try {        
         const listRefund = await TicketRefundModel.find({user: id})
@@ -100,7 +101,17 @@ const allTicketRefund = async (req, res) => {
             return {item, showTime, film, seats, room, theater}
 
         }))
-        res.status(200).json(data)
+
+        
+        const start = (parseInt(number) - 1) * 5
+        const end = start + 5;
+        const newAll = data.slice(start, end);
+        const totalPages = Math.ceil(data.length / 5)
+        
+        res.status(200).json({
+            data: newAll,
+            length: totalPages
+        })
     } catch (error) {
         console.log(error)
         res.status(500).json({
@@ -115,6 +126,7 @@ const ticketRefundByOrder = async (req, res) => {
     try {        
         const data = await TicketRefundModel.findOne({order: id})
         res.status(200).json(data)
+
     } catch (error) {
         console.log(error)
         res.status(500).json({
