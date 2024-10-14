@@ -1,15 +1,14 @@
 const mongoose = require('mongoose');
 
-const NewsSchema = new mongoose.Schema({
+const EventSchema = new mongoose.Schema({
     title: { type: String, required: true },
     image: { type: String, required: true },
     content: { type: String, required: true },
-    staff: { type: mongoose.Schema.Types.ObjectId, ref: 'Staff', required: true},
     status: { type: Boolean, required: true, default: false },
 }, {
     timestamps: true 
 });
 
-const NewsModel = mongoose.model('News', NewsSchema)
+const EventModel = mongoose.model('Event', EventSchema)
 
-module.exports = NewsModel
+module.exports = EventModel

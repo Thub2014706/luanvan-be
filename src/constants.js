@@ -22,7 +22,9 @@ const allAccess = {
     14: 'Đặt combo, bắp nước',
     15: 'Danh sách vé',
     16: 'In vé',
-    17: 'Quảng cáo'
+    17: 'Quảng cáo',
+    18: 'Sự kiện',
+    19: 'Tin tức'
 }
 
 const typeSurcharge = {

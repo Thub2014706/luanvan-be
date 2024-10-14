@@ -23,6 +23,8 @@ const ticketRefundRouter = require('./TicketRefundRouter')
 const commentRouter = require('./CommentRouter')
 const statisticalRouter = require('./StatisticalRouter')
 const AdvertisementRouter = require('./AdvertisementRouter')
+const EventRouter = require('./EventRouter')
+const NewsRouter = require('./NewsRouter')
 
 const routes = (app) => {
     app.use('/api/user/', userRouter)
@@ -50,6 +52,8 @@ const routes = (app) => {
     app.use('/api/comment/', commentRouter)
     app.use('/api/statistical/', statisticalRouter)
     app.use('/api/advertisement/', AdvertisementRouter)
+    app.use('/api/event/', EventRouter)
+    app.use('/api/news/', NewsRouter)
 
 }
 

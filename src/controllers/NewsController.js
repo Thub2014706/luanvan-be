@@ -1,16 +1,16 @@
-const AdvertisementModel = require("../models/AdvertisementModel")
+const NewsModel = require("../models/NewsModel")
 
-const addAdvertisement = async (req, res) => {
+const addNews = async (req, res) => {
     const image = req.file?.filename
-    const {link} = req.body
-        
-    if (!image || !link) {
+    const {title, content, staff} = req.body
+
+    if (!image || !title || !content || !staff) {
         return res.status(400).json({
             message: "Nhập đầy đủ thông tin"
         })
     }
     try {
-        const data = await AdvertisementModel.create({ link, image})
+        const data = await NewsModel.create({ image, title, content, staff})
         res.status(200).json(data)
     } catch (error) {
         console.log(error)
@@ -20,18 +20,18 @@ const addAdvertisement = async (req, res) => {
     }
 }
 
-const updateAdvertisement = async (req, res) => {
+const updateNews = async (req, res) => {
     const id = req.params.id
-    const { link, imageId } = req.body
+    const { title, content, imageId, staff } = req.body
     const image = imageId ? imageId : req.file.filename
 
-    if (!image || !link) {
+    if (!image || !title || !content || !staff) {
         return res.status(400).json({
             message: "Nhập đầy đủ thông tin"
         })
     }
     try {
-        const data = await AdvertisementModel.findByIdAndUpdate(id, { link, image}, {new: true})
+        const data = await NewsModel.findByIdAndUpdate(id, { title, content, image, staff}, {new: true})
         res.status(200).json(data)
     } catch (error) {
         console.log(error)
@@ -41,11 +41,11 @@ const updateAdvertisement = async (req, res) => {
     }
 }
 
-const detailAdvertisement = async (req, res) => {
+const detailNews = async (req, res) => {
     const id = req.params.id
 
     try {
-        const data = await AdvertisementModel.findById(id)
+        const data = await NewsModel.findById(id)
         res.status(200).json(data)
     } catch (error) {
         console.log(error)
@@ -55,11 +55,11 @@ const detailAdvertisement = async (req, res) => {
     }
 }
 
-const allAdvertisement = async (req, res) => {
+const allNews = async (req, res) => {
     const {number, show} = req.query
 
     try {
-        const data = await AdvertisementModel.find({}).sort({createdAt: -1})
+        const data = await NewsModel.find({}).sort({createdAt: -1})
         const start = (parseInt(number) - 1) * parseInt(show)
         const end = start + parseInt(show);
         const newAll = data.slice(start, end);
@@ -77,11 +77,11 @@ const allAdvertisement = async (req, res) => {
     }
 }
 
-const statusAdvertisement = async (req, res) => {
+const statusNews = async (req, res) => {
     const id = req.params.id
     try {
-        const existing = await AdvertisementModel.findById(id);
-        const data = await AdvertisementModel.findByIdAndUpdate(id, {status: !existing.status}, { new: true })
+        const existing = await NewsModel.findById(id);
+        const data = await NewsModel.findByIdAndUpdate(id, {status: !existing.status}, { new: true })
         res.status(200).json(data)
     } catch (error) {
         console.log(error)
@@ -91,10 +91,10 @@ const statusAdvertisement = async (req, res) => {
     }
 }
 
-const listAdvertisement = async (req, res) => {
+const listNews = async (req, res) => {
 
     try {
-        const data = await AdvertisementModel.find({status: true})
+        const data = await NewsModel.find({status: true})
         res.status(200).json(data)
     } catch (error) {
         console.log(error)
@@ -104,11 +104,11 @@ const listAdvertisement = async (req, res) => {
     }
 }
 
-const deleteAdvertisement = async (req, res) => {
+const deleteNews = async (req, res) => {
     const id = req.params.id
 
     try {
-        await AdvertisementModel.findByIdAndDelete(id)
+        await NewsModel.findByIdAndDelete(id)
         res.status(200).json({message: 'Xóa thành công'})
     } catch (error) {
         console.log(error)
@@ -119,11 +119,11 @@ const deleteAdvertisement = async (req, res) => {
 }
 
 module.exports = {
-    addAdvertisement,
-    updateAdvertisement,
-    allAdvertisement,
-    detailAdvertisement,
-    statusAdvertisement,
-    listAdvertisement,
-    deleteAdvertisement
+    addNews,
+    updateNews,
+    allNews,
+    detailNews,
+    statusNews,
+    listNews,
+    deleteNews
 }
