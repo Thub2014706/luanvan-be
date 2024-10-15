@@ -11,6 +11,9 @@ const RoomModel = require("../models/RoomModel")
 const FilmModel = require("../models/FilmModel")
 const DiscountModel = require("../models/DiscountModel")
 const TicketRefundModel = require("../models/TicketRefundModel")
+const excelJS = require('exceljs');
+const fs = require('fs');
+const moment = require('moment');
 
 const updateUserPoints = async (user, price) => {
     const allOrderTicket = await OrderTicketModel.find({member: user._id, status: typePay[1]})
@@ -114,17 +117,76 @@ const allOrderTicketSelled = async (req, res) => {
     }
 }
 
-const allOrderTicket = async (req, res) => {
-    const {theater, number, show} = req.query
+const constAllOrder = async (theater) => {
     try {
-        const orderTicket = await OrderTicketModel.find({status: typePay[1]})
+        
+        const orderTicket = await OrderTicketModel.find({status: typePay[1]}).populate({
+                path: 'showTime',
+                populate: [{
+                    path: 'schedule',
+                    populate: {
+                        path: 'film',
+                        model: 'Film',
+                        select: 'name'
+                    }
+                }, {
+                    path: 'theater',
+                    model: 'Theater',
+                    select: 'name'
+                }, {
+                    path: 'room',
+                    model: 'Room',
+                    select: 'name'
+                }]
+            }).populate({
+                path: 'seat',
+                model: 'Seat',
+                select: ['row', 'col']
+            }).populate({
+                path: 'member',
+                model: 'User',
+                select: 'username'
+            }).populate({
+                path: 'staff',
+                model: 'Staff',
+                select: 'username'
+            }).populate({
+                path: 'combo.id',
+                model: 'Combo', 
+                select: 'name'
+            }).populate({
+                path: 'combo.id',
+                model: 'Food',
+                select: 'name'
+            });
         const refund = await TicketRefundModel.find({})
-        // console.log(refund[0].order,  allOrderTicket[0]._id);
+        // console.log(orderTicket[0].seat);
         
         const data1 = orderTicket.filter(item => {
             return !refund.some(mini => mini.order.equals(item._id));
         });
-        const data2 = await OrderComboModel.find({status: typePay[1]})
+        const data2 = await OrderComboModel.find({status: typePay[1]}).populate({
+            path: 'member',
+            model: 'User',
+            select: 'username'
+        }).populate({
+            path: 'staff',
+            model: 'Staff',
+            select: 'username'
+        }).populate({
+            path: 'combo.id',
+            model: 'Combo',
+            select: 'name'
+        })
+        .populate({
+            path: 'combo.id',
+            model: 'Food',
+            select: 'name'
+        }).populate({
+            path: 'theater',
+            model: 'Theater',
+            select: 'name'
+        });
         const data = [...data1, ...data2].sort((a, b) => b.createdAt - a.createdAt)
         let getData
         if (theater) {
@@ -143,14 +205,30 @@ const allOrderTicket = async (req, res) => {
 
         const finalData = getData.filter(item => item !== null)
 
+        return finalData
+        
+    } catch (error) {
+        console.log('ee0', error)
+        res.status(500).json({
+            message: "Đã có lỗi xảy ra",
+        })
+    }
+}
+
+const allOrderTicket = async (req, res) => {
+    const {theater, number, show} = req.query
+    try {
+        const finalData = await constAllOrder(theater)
+
         const start = (parseInt(number) - 1) * parseInt(show)
         const end = start + parseInt(show);
         const newAll = finalData.slice(start, end);
         const totalPages = Math.ceil(finalData.length / parseInt(show))
+        
         res.status(200).json({
             data: newAll,
             sumPage: totalPages,
-            length: getData.length
+            length: finalData.length
         })
         
     } catch (error) {
@@ -228,6 +306,84 @@ const allOrderByUser = async (req, res) => {
     }
 }
 
+const exportReport = async (req, res) => {
+    const {theater} = req.query
+    try {
+        let wordBook = new excelJS.Workbook()
+
+        const finalData = await constAllOrder(theater)
+        const sheet = wordBook.addWorksheet("orders")
+        sheet.columns = [
+            {header: 'Mã vé', key: 'idOrder', width: 25},
+            {header: 'Tên phim', key: 'film', width: 25},
+            {header: 'Rạp chiếu', key: 'theater', width: 25},
+            {header: 'Phòng chiếu', key: 'room', width: 25},
+            {header: 'Ghế', key: 'seat', width: 25},
+            {header: 'Suất chiếu', key: 'showTime', width: 25},
+            {header: 'Combo', key: 'combo', width: 25},
+            {header: 'Thành viên', key: 'member', width: 25},
+            {header: 'Nhân viên', key: 'staff', width: 25},
+            {header: 'Thời gian đặt vé', key: 'createdAt', width: 25},
+            {header: 'Tổng', key: 'total', width: 25},
+            {header: 'Mã khuyến mãi', key: 'discount', width: 25},
+            {header: 'Điểm tích lũy', key: 'point', width: 25},
+            {header: 'Tổng thanh toán', key: 'price', width: 25},
+        ]
+
+        finalData.map((value, idx) => {
+            let seatString = ''
+            value.seat?.map((item, index) => 
+                seatString += `${String.fromCharCode(64 + item.row)}${item.col}` + 
+                `${index < value.seat?.length - 1 ? ', ' : ''}`
+            )
+            let comboString = ''
+            value.combo.length > 0 ? value.combo.map((item, index) => 
+                comboString += `${item.quantity} ${item.name}\n` +
+                `${index < value.combo.length - 1 ? ', ' : ''}`
+            ) : ''
+
+            const point = value.usePoint && value.usePoint > 0 ? value.usePoint : 0
+            const discount = value.discount && value.discount.useDiscount > 0 ? value.discount.useDiscount : 0
+                
+            sheet.addRow({
+                idOrder: value.idOrder, 
+                film: value.showTime?.schedule.film.name, 
+                theater: value.showTime ? value.showTime.theater.name : value.theater.name, 
+                room: value.showTime?.room.name,
+                seat: seatString,
+                showTime: value.showTime ? `${value.showTime.timeStart} - ${value.showTime.timeEnd} ${moment(value.showTime.date).format('DD-MM-YYYY')}` : '',
+                combo: comboString,
+                member: value.member?.username,
+                staff: value.staff?.username,
+                createdAt: moment(value.createdAt).format('HH:mm:ss DD-MM-YYYY'),
+                total: value.price + point + discount,
+                discount: discount > 0 ? discount : '',
+                point: point > 0 ? point : '', 
+                price: value.price
+            })
+        })
+
+        res.setHeader(
+            "Content-Type",
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        );
+        res.setHeader(
+            "Content-Disposition",
+            "attachment;filename=" + "danh_sach_ve.xlsx"
+        );
+
+        await wordBook.xlsx.write(res).then(() => res.end());
+        // console.log(data);
+        
+        // res.status(200).json('ok')
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({
+            message: "Đã có lỗi xảy ra",
+        })
+    }
+}
+
 module.exports = {
     addOrderTicket,
     detailOrderTicket,
@@ -235,5 +391,6 @@ module.exports = {
     allOrderTicket,
     updateUserPoints,
     sumPayByUser,
-    allOrderByUser
+    allOrderByUser,
+    exportReport
 }

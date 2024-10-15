@@ -10,5 +10,6 @@ router.get('/', orderTicketController.allOrderTicket);
 // router.delete('/:id', middlewares.performerAccuracy, performerController.deletePerformer);
 router.get('/sum-by-user/:id', orderTicketController.sumPayByUser);
 router.get('/order-by-user/:id', orderTicketController.allOrderByUser);
+router.get('/export', orderTicketController.exportReport);
 
 module.exports = router
