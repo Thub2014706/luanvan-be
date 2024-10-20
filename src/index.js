@@ -23,15 +23,24 @@ const io = new Server(server, {
   }
 })
 
+// const adminId = 'admin'; 
+const userConnections = {};
 io.on("connection", (socket) => {
-    // let users = {}
+    // let userInRoom = {}
+    // let number = {}
 
     socket.on('listUser', async (user) => {
         let list = []
         if (await StaffModel.findById(user)) {
-            list = await ChatModel.distinct('user');
+            list = await ChatModel.aggregate([
+                {$group: { _id: "$user", lastMess: { $max: "$createdAt" }}},
+                {$sort: {lastMess: -1}}
+            ]);
         }
-        const data = await Promise.all(list.map(async item => {
+        // console.log(list);
+        const users = list.map(item => item._id)
+        
+        const data = await Promise.all(users.map(async item => {
             return await UserModel.findById(item)
         }))
         socket.emit('userList', data);
@@ -40,10 +49,37 @@ io.on("connection", (socket) => {
     socket.on('join', (user) => {
         const loadMessages = async () => {
             try {             
-                // users[user] = socket.id
+                if (!userConnections[user]) {
+                    userConnections[user] = new Set();
+                }
+                userConnections[user].add(socket.id);
                 socket.join(user)
-                const messages = await ChatModel.find({user}).sort({createdAt: 1}).exec();
+                // console.log('join', userConnections[user], socket.id);    
+                const messages = await ChatModel.find({user}).sort({createdAt: 1});
                 socket.emit('chat', messages)
+                // if (userConnections[user].size > 0) {
+                //     await ChatModel.updateMany({user, seen: false}, {seen: true})
+                // }
+                await ChatModel.updateMany({user, seen: false, senderType: false}, {seen: true})
+            } catch (error) {
+                console.log(error)
+            }
+        }
+        loadMessages()
+    })
+
+    socket.on('adminJoin', (user) => {
+        const loadMessages = async () => {
+            try {             
+                if (!userConnections[user]) {
+                    userConnections[user] = new Set();
+                }
+                userConnections[user].add(socket.id);
+                socket.join(user)
+                // console.log('join', userConnections[user], socket.id);    
+                const messages = await ChatModel.find({user}).sort({createdAt: 1});
+                socket.emit('chat', messages)
+                await ChatModel.updateMany({user, seen: false, senderType: true}, {seen: true})
             } catch (error) {
                 console.log(error)
             }
@@ -55,17 +91,42 @@ io.on("connection", (socket) => {
         try {
             const newMessage = new ChatModel(msg)
             await newMessage.save()
-            io.to(msg.user).emit('message', msg)
+            io.to(msg.user).emit('message', msg);
+            // console.log("socket", socket.id)
+
+            if (userConnections[msg.user] && userConnections[msg.user].size > 1) {
+                await ChatModel.updateMany({user: msg.user, seen: false}, {seen: true})
+            }
+            
         }catch(err) {
             console.log(err)
         }
     })
 
-    // socket.on("numberMess", () => {
-    // })
+    socket.on("number", async (user) => {
+        const chat = await ChatModel.find({user, seen: false, senderType: false})
+        socket.emit('number', chat.length)
+        // console.log(chat.length);
+        
+    })
+    
+    socket.on("leave", (user) => {
+        socket.leave(user)
+        if (userConnections[user]) {
+            userConnections[user].delete(socket.id);
+            // console.log("leave", userConnections[user].size)
+        }
+    })
 
     socket.on("disconnect", () => {
         console.log("disconnect")
+        for (const user in userConnections) {
+            if (userConnections[user].has(socket.id)) {
+                userConnections[user].delete(socket.id);
+                console.log(`${user} disconnected, remaining connections: ${userConnections[user].size}`);
+                break;
+            }
+        }
     })
 })
 
