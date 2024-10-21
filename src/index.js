@@ -24,10 +24,13 @@ const io = new Server(server, {
 })
 
 // const adminId = 'admin'; 
-const userConnections = {};
+const userSocketMap = {};
+const userInRoom = {};
+const numberChat = {}
 io.on("connection", (socket) => {
-    // let userInRoom = {}
-    // let number = {}
+    const userId = socket.handshake.query.userId; 
+    userSocketMap[userId] = socket.id;
+    // console.log('connect', io.sockets.sockets);
 
     socket.on('listUser', async (user) => {
         let list = []
@@ -45,21 +48,35 @@ io.on("connection", (socket) => {
         }))
         socket.emit('userList', data);
     })
+    
+    // socket.on("adminNumber", async (user) => {
+    //     const chat = await ChatModel.find({user, seen: false, senderType: true})
+    //     numberChat[user] = chat.length;
+    //     io.emit('adminNumber', numberChat[user])
+    //     // console.log(chat.length);
+        
+    // })
+
+    socket.on("number", async (user) => {
+        const chat = await ChatModel.find({user, seen: false, senderType: false})
+        numberChat[user] = chat.length;
+        socket.emit('numberFirst', numberChat[user])
+        // console.log("t: ", numberChat[user]);
+        
+    })
 
     socket.on('join', (user) => {
         const loadMessages = async () => {
             try {             
-                if (!userConnections[user]) {
-                    userConnections[user] = new Set();
+                if (!userInRoom[user]) {
+                    userInRoom[user] = new Set();
                 }
-                userConnections[user].add(socket.id);
+                userInRoom[user].add(socket.id);
+                numberChat[user] = 0;
+                socket.emit('removeNumber', numberChat[user]);
                 socket.join(user)
-                // console.log('join', userConnections[user], socket.id);    
                 const messages = await ChatModel.find({user}).sort({createdAt: 1});
                 socket.emit('chat', messages)
-                // if (userConnections[user].size > 0) {
-                //     await ChatModel.updateMany({user, seen: false}, {seen: true})
-                // }
                 await ChatModel.updateMany({user, seen: false, senderType: false}, {seen: true})
             } catch (error) {
                 console.log(error)
@@ -71,15 +88,18 @@ io.on("connection", (socket) => {
     socket.on('adminJoin', (user) => {
         const loadMessages = async () => {
             try {             
-                if (!userConnections[user]) {
-                    userConnections[user] = new Set();
+                if (!userInRoom[user]) {
+                    userInRoom[user] = new Set();
                 }
-                userConnections[user].add(socket.id);
+                userInRoom[user].add(socket.id);
+                // numberChat[user] = 0;
+                // io.emit('adminNumber', numberChat[user]);
                 socket.join(user)
-                // console.log('join', userConnections[user], socket.id);    
                 const messages = await ChatModel.find({user}).sort({createdAt: 1});
                 socket.emit('chat', messages)
                 await ChatModel.updateMany({user, seen: false, senderType: true}, {seen: true})
+                console.log(123);
+                
             } catch (error) {
                 console.log(error)
             }
@@ -92,38 +112,36 @@ io.on("connection", (socket) => {
             const newMessage = new ChatModel(msg)
             await newMessage.save()
             io.to(msg.user).emit('message', msg);
-            // console.log("socket", socket.id)
-
-            if (userConnections[msg.user] && userConnections[msg.user].size > 1) {
+            if (userInRoom[msg.user] && userInRoom[msg.user].size > 1) {
                 await ChatModel.updateMany({user: msg.user, seen: false}, {seen: true})
+                numberChat[msg.user] = 0;
+            } else {
+                numberChat[msg.user] = (numberChat[msg.user] || 0) + 1;
             }
+            const socketId = userSocketMap[msg.user];
+            console.log(numberChat[msg.user]);
+            io.to(socketId).emit('addNumber', numberChat[msg.user]);
             
         }catch(err) {
             console.log(err)
         }
     })
-
-    socket.on("number", async (user) => {
-        const chat = await ChatModel.find({user, seen: false, senderType: false})
-        socket.emit('number', chat.length)
-        // console.log(chat.length);
-        
-    })
     
     socket.on("leave", (user) => {
         socket.leave(user)
-        if (userConnections[user]) {
-            userConnections[user].delete(socket.id);
-            // console.log("leave", userConnections[user].size)
+        if (userInRoom[user]) {
+            userInRoom[user].delete(socket.id);
+            // console.log("leave", userInRoom[user].size)
         }
     })
 
     socket.on("disconnect", () => {
         console.log("disconnect")
-        for (const user in userConnections) {
-            if (userConnections[user].has(socket.id)) {
-                userConnections[user].delete(socket.id);
-                console.log(`${user} disconnected, remaining connections: ${userConnections[user].size}`);
+        delete userSocketMap[userId];
+        for (const user in userInRoom) {
+            if (userInRoom[user].has(socket.id)) {
+                userInRoom[user].delete(socket.id);
+                console.log(`${user} disconnected, remaining connections: ${userInRoom[user].size}`);
                 break;
             }
         }
