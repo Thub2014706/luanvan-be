@@ -27,35 +27,56 @@ const io = new Server(server, {
 const userSocketMap = {};
 const userInRoom = {};
 const numberChat = {}
+const listUser = []
 io.on("connection", (socket) => {
     const userId = socket.handshake.query.userId; 
     userSocketMap[userId] = socket.id;
-    // console.log('connect', io.sockets.sockets);
+    // console.log('connect', userInRoom);
 
-    socket.on('listUser', async (user) => {
+    // socket.on('listUser', async (user) => {
+    //     let list = []
+    //     if (await StaffModel.findById(user)) {
+    //         list = await ChatModel.aggregate([
+    //             {$group: { _id: "$user", lastMess: { $max: "$createdAt" }}},
+    //             {$sort: {lastMess: -1}}
+    //         ]);
+    //     }
+    //     // console.log(list);
+    //     const users = list.map(item => item._id)
+        
+    //     const data = await Promise.all(users.map(async item => {
+    //         return await UserModel.findById(item)
+    //     }))
+    //     socket.emit('userList', data);
+    // })
+    
+    socket.on("adminNumber", async (user) => {
         let list = []
         if (await StaffModel.findById(user)) {
             list = await ChatModel.aggregate([
                 {$group: { _id: "$user", lastMess: { $max: "$createdAt" }}},
                 {$sort: {lastMess: -1}}
             ]);
-        }
-        // console.log(list);
-        const users = list.map(item => item._id)
-        
-        const data = await Promise.all(users.map(async item => {
-            return await UserModel.findById(item)
+        }        
+        const array = await Promise.all(list.map(async item => {
+            const chat = await ChatModel.find({user: item._id, seen: false, senderType: true})
+            const chatTime = await ChatModel.find({ user: item._id })
+                .sort({ createdAt: -1 })
+                .limit(1)
+                // .distinct('createdAt'); 
+            const userInfo = await UserModel.findById(item._id); 
+            // console.log(chatTime);
+            
+            return {
+                user: userInfo,
+                count: chat.length,
+                chat: chatTime[0]
+            };
         }))
-        socket.emit('userList', data);
-    })
-    
-    // socket.on("adminNumber", async (user) => {
-    //     const chat = await ChatModel.find({user, seen: false, senderType: true})
-    //     numberChat[user] = chat.length;
-    //     io.emit('adminNumber', numberChat[user])
-    //     // console.log(chat.length);
+        socket.emit('adminNumberFirst', array)
+        // console.log('wdqwd',array);
         
-    // })
+    })
 
     socket.on("number", async (user) => {
         const chat = await ChatModel.find({user, seen: false, senderType: false})
@@ -75,6 +96,9 @@ io.on("connection", (socket) => {
                 numberChat[user] = 0;
                 socket.emit('removeNumber', numberChat[user]);
                 socket.join(user)
+                // console.log('a',userInRoom[user]);
+                // console.log('connect', userInRoom);
+                
                 const messages = await ChatModel.find({user}).sort({createdAt: 1});
                 socket.emit('chat', messages)
                 await ChatModel.updateMany({user, seen: false, senderType: false}, {seen: true})
@@ -92,13 +116,16 @@ io.on("connection", (socket) => {
                     userInRoom[user] = new Set();
                 }
                 userInRoom[user].add(socket.id);
-                // numberChat[user] = 0;
-                // io.emit('adminNumber', numberChat[user]);
+                
+                io.emit('adminRemoveNumber', user);
                 socket.join(user)
+                // console.log('a',userInRoom[user]);
+
+                // console.log('aa',socket.id);
+
                 const messages = await ChatModel.find({user}).sort({createdAt: 1});
                 socket.emit('chat', messages)
                 await ChatModel.updateMany({user, seen: false, senderType: true}, {seen: true})
-                console.log(123);
                 
             } catch (error) {
                 console.log(error)
@@ -112,15 +139,35 @@ io.on("connection", (socket) => {
             const newMessage = new ChatModel(msg)
             await newMessage.save()
             io.to(msg.user).emit('message', msg);
-            if (userInRoom[msg.user] && userInRoom[msg.user].size > 1) {
-                await ChatModel.updateMany({user: msg.user, seen: false}, {seen: true})
-                numberChat[msg.user] = 0;
+            if (!msg.senderType) {
+                const socketId = userSocketMap[msg.user];
+                if (Array.from(userInRoom[msg.user]).includes(socketId)) {
+                    await ChatModel.updateMany({user: msg.user, seen: false, senderType: false}, {seen: true})
+                    numberChat[msg.user] = 0;
+                } else {
+                    numberChat[msg.user] = (numberChat[msg.user] || 0) + 1;
+                }
+                io.to(socketId).emit('addNumber', numberChat[msg.user]);
+                io.to(msg.user).emit('newMessAdmin', {
+                    user: await UserModel.findById(msg.user),
+                    chat: msg
+                });
             } else {
-                numberChat[msg.user] = (numberChat[msg.user] || 0) + 1;
+                let num
+                const socketId = userSocketMap['adminId'];
+                if (Array.from(userInRoom[msg.user]).includes(socketId)) {
+                    await ChatModel.updateMany({user: msg.user, seen: false, senderType: true}, {seen: true})
+                    num = 0
+                } else {
+                    num = 1;
+                }
+                const data = {
+                    user: await UserModel.findById(msg.user),
+                    count: num,
+                    chat: msg
+                }
+                io.to(socketId).emit('adminAddNumber', data);
             }
-            const socketId = userSocketMap[msg.user];
-            console.log(numberChat[msg.user]);
-            io.to(socketId).emit('addNumber', numberChat[msg.user]);
             
         }catch(err) {
             console.log(err)
