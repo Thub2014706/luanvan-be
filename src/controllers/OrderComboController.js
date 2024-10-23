@@ -66,7 +66,7 @@ const allOrderByUser = async (req, res) => {
     const id = req.params.id
     const {number} = req.query
     try {
-        const allOrderCombo = await OrderComboModel.find({member: id}).sort({createdAt: -1});
+        const allOrderCombo = await OrderComboModel.find({member: id, status: typePay[1]}).sort({createdAt: -1});
         const data = await Promise.all(allOrderCombo.map(async item => {
             let theater
 

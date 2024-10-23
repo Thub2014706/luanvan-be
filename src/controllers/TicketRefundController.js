@@ -46,11 +46,12 @@ const addTicketRefund = async (req, res) => {
         })
     }
     
-    if (showTime.date === now.setUTCHours(0, 0, 0, 0) && hours >= newTime.hours()) {
+    if (new Date(showTime.date).setUTCHours(0, 0, 0, 0) === now.setUTCHours(0, 0, 0, 0) && hours >= newTime.hours()) {
         return res.status(400).json({
             message: 'Đã quá thời gian hoàn vé!'
         })
     }
+
 
     const print = await PrintTicketModel.findOne({order})
     if (print || orderDetail.staff) {

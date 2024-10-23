@@ -82,7 +82,7 @@ const standardAge = [
     'T13 - Cấm người dưới 13 tuổi',
     'T16 - Cấm người dưới 16 tuổi',
     'T18 - Cấm người dưới 18 tuổi',
-    'C - Phim không được phép phổ biến',
+    // 'C - Phim không được phép phổ biến',
 ];
 
 const signAge = [
@@ -91,7 +91,7 @@ const signAge = [
     'T13',
     'T16',
     'T18',
-    'C',
+    // 'C',
 ];
 
 const statusTicket = {

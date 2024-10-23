@@ -6,6 +6,7 @@ const ScheduleModel = require("../models/ScheduleModel");
 const { typeSchedule } = require("../constants");
 const { schedule } = require("node-cron");
 const ShowTimeModel = require("../models/ShowTimeModel");
+const TheaterModel = require("../models/TheaterModel");
 
 const addFilm = async (req, res) => {
     const {name, time, nation, genre, director, releaseDate, endDate, age, performer, trailer, description} = req.body
@@ -104,8 +105,6 @@ const allFilm = async (req, res) => {
         const all = await FilmModel.find({}).sort({createdAt: -1})
         const searchAll = await Promise.all(
             all.map(async (item) => {
-                // const genres = await Promise.all(item.genre.map(genre => GenreModel.findById(genre)))
-                // , ...genres.map(genre => genre.name)
                 const searchStrings = [item.name, item.nation];
 
                 const matchesSearch = searchStrings.some(any => 
@@ -220,9 +219,67 @@ const listFilmByTheater = async (req, res) => {
         const newData = filterData.filter((film, index, self) => 
             index === self.findIndex((f) => f._id.toString() === film._id.toString())
         );
-    console.log(newData)
+    // console.log(newData)
 
         res.status(200).json(newData)
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({
+            message: "Đã có lỗi xảy ra",
+        })
+    }
+}
+
+const searchFilm = async (req, res) => {
+    const {search} = req.query
+    try {
+        const allFilm = await FilmModel.find({status: true})
+        const allTheater = await TheaterModel.find({status: true})
+        // const all = [...allFilm, ...allTheater]
+        const searchAllFilm = await Promise.all(
+            allFilm.map(async (item) => {
+                const searchStrings = [item.name, item.description];
+
+                const matchesSearch = searchStrings.some(any => 
+                    any
+                    .toString()
+                    .normalize('NFD')
+                    .replace(/[\u0300-\u036f]/g, '')
+                    .toLowerCase()
+                    .includes(
+                        search
+                            .normalize('NFD')
+                            .replace(/[\u0300-\u036f]/g, '')
+                            .toLowerCase(),
+                    )
+                );
+                return matchesSearch ? item : null
+            })
+        )
+        const allFilmResult = searchAllFilm.filter(item => item !== null)
+
+        const searchAllTheater = await Promise.all(
+            allTheater.map(async (item) => {
+                const searchStrings = [item.name, item.address, item.province, item.district, item.ward];
+
+                const matchesSearch = searchStrings.some(any => 
+                    any
+                    .toString()
+                    .normalize('NFD')
+                    .replace(/[\u0300-\u036f]/g, '')
+                    .toLowerCase()
+                    .includes(
+                        search
+                            .normalize('NFD')
+                            .replace(/[\u0300-\u036f]/g, '')
+                            .toLowerCase(),
+                    )
+                );
+                return matchesSearch ? item : null
+            })
+        )
+        const allTheaterResult = searchAllTheater.filter(item => item !== null)
+        res.status(200).json({films: allFilmResult, theaters: allTheaterResult})
     } catch (error) {
         console.log(error)
         res.status(500).json({
@@ -241,5 +298,6 @@ module.exports = {
     listFilm,
     listFilmBySchedule,
     listFilmByTheater,
-    detailFilmBySchedule
+    detailFilmBySchedule,
+    searchFilm
 }

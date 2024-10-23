@@ -242,8 +242,8 @@ const allOrderTicket = async (req, res) => {
 const sumPayByUser = async (req, res) => {
     const id = req.params.id
     try {
-        const allOrderTicket = await OrderTicketModel.find({member: id})
-        const allOrderCombo = await OrderComboModel.find({member: id})
+        const allOrderTicket = await OrderTicketModel.find({member: id, status: typePay[1]})
+        const allOrderCombo = await OrderComboModel.find({member: id, status: typePay[1]})
         const allOrder = [...allOrderTicket, ...allOrderCombo]
         let sum = 0
         allOrder.forEach(item => {
@@ -262,7 +262,7 @@ const allOrderByUser = async (req, res) => {
     const id = req.params.id
     const {number} = req.query
     try {
-        const allOrderTicket = await OrderTicketModel.find({member: id}).sort({createdAt: -1});
+        const allOrderTicket = await OrderTicketModel.find({member: id, status: typePay[1]}).sort({createdAt: -1});
         const refund = await TicketRefundModel.find({user: id})
         
         const allFilter = allOrderTicket.filter(item => {

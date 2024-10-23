@@ -14,5 +14,6 @@ router.patch('/status/:id', middlewares.filmAccuracy, filmController.statusFilm)
 router.get('/list', filmController.listFilm);
 router.get('/list-by-schedule', filmController.listFilmBySchedule);
 router.get('/list-by-theater', filmController.listFilmByTheater);
+router.get('/search', filmController.searchFilm);
 
 module.exports = router

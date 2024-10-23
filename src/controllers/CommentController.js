@@ -9,7 +9,7 @@ const addComment = async (req, res) => {
     const { user, film } = req.body
 
     const orders = await OrderTicketModel
-        .find({member: user})
+        .find({member: user, status: typePay[1]})
         .populate({
             path: 'showTime',
             populate: {
