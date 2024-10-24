@@ -27,28 +27,9 @@ const io = new Server(server, {
 const userSocketMap = {};
 const userInRoom = {};
 const numberChat = {}
-const listUser = []
 io.on("connection", (socket) => {
     const userId = socket.handshake.query.userId; 
     userSocketMap[userId] = socket.id;
-    // console.log('connect', userInRoom);
-
-    // socket.on('listUser', async (user) => {
-    //     let list = []
-    //     if (await StaffModel.findById(user)) {
-    //         list = await ChatModel.aggregate([
-    //             {$group: { _id: "$user", lastMess: { $max: "$createdAt" }}},
-    //             {$sort: {lastMess: -1}}
-    //         ]);
-    //     }
-    //     // console.log(list);
-    //     const users = list.map(item => item._id)
-        
-    //     const data = await Promise.all(users.map(async item => {
-    //         return await UserModel.findById(item)
-    //     }))
-    //     socket.emit('userList', data);
-    // })
     
     socket.on("adminNumber", async (user) => {
         let list = []
@@ -188,7 +169,6 @@ io.on("connection", (socket) => {
         for (const user in userInRoom) {
             if (userInRoom[user].has(socket.id)) {
                 userInRoom[user].delete(socket.id);
-                console.log(`${user} disconnected, remaining connections: ${userInRoom[user].size}`);
                 break;
             }
         }

@@ -38,15 +38,21 @@ const addTicketRefund = async (req, res) => {
     const showTime = await ShowTimeModel.findById(orderDetail.showTime)
     const initialTime = momentTimezone.tz(showTime.timeStart, 'HH:mm', 'Asia/Ho_Chi_Minh');
     const newTime = initialTime.subtract(60, 'minutes');
-    const hours = now.getHours()
-
+    // const hours = now.getHours()
+    // console.log(momentTimezone
+    //     .tz(now, 'HH:mm', 'Asia/Ho_Chi_Minh')
+    //     ,(momentTimezone.tz(newTime, 'HH:mm', 'Asia/Ho_Chi_Minh')));
+    
     if (orderDetail.discount && orderDetail.discount.useDiscount) {
         return res.status(400).json({
             message: 'Vé này có sử dụng khuyến mãi!'
         })
     }
     
-    if (new Date(showTime.date).setUTCHours(0, 0, 0, 0) === now.setUTCHours(0, 0, 0, 0) && hours >= newTime.hours()) {
+    if (momentTimezone
+        .tz(now, 'HH:mm', 'Asia/Ho_Chi_Minh')
+        .isAfter(momentTimezone.tz(newTime, 'HH:mm', 'Asia/Ho_Chi_Minh'))
+    ) {
         return res.status(400).json({
             message: 'Đã quá thời gian hoàn vé!'
         })

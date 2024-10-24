@@ -1,9 +1,8 @@
 const { isEmpty } = require("validator")
 const CommentModel = require("../models/CommentModel")
+const momentTimezone = require("moment-timezone")
 const OrderTicketModel = require("../models/OrderTicketModel")
-const ShowTimeModel = require("../models/ShowTimeModel")
-const ScheduleModel = require("../models/ScheduleModel")
-const FilmModel = require("../models/FilmModel")
+const { typePay } = require("../constants")
 
 const addComment = async (req, res) => {
     const { user, film } = req.body
@@ -28,15 +27,41 @@ const addComment = async (req, res) => {
             message: "Bạn cần mua vé xem phim này mới có thể tham gia đánh giá.",
         })
     }
-
+    
     const comment = await CommentModel.findOne({user, film})
     if (comment) {
         return res.status(400).json({
             message: "Bạn đã gửi đánh giá cho phim này trước đó.",
         })
     }
-    try {
 
+    // const test = orders.some(order => {
+    //     console.log(momentTimezone
+    //         .tz(order.showTime.timeStart, 'HH:mm YYYY-MM-DD', 'Asia/Ho_Chi_Minh'), momentTimezone.tz(new Date(), 'HH:mm YYYY-MM-DD', 'Asia/Ho_Chi_Minh'));
+        
+    //     return momentTimezone
+    //         .tz(order.showTime.timeStart, 'HH:mm YYYY-MM-DD', 'Asia/Ho_Chi_Minh')
+    //         .isBefore(momentTimezone.tz(new Date(), 'HH:mm  YYYY-MM-DD', 'Asia/Ho_Chi_Minh'))
+    // })
+
+    const order = orders.filter(order => order.showTime.schedule.film._id.toString() === film)
+        .sort((a, b) => new Date(a.showTime.date).getTime() - new Date(b.showTime.date).getTime());    
+    // console.log(order);
+    
+    // console.log(momentTimezone
+    //             .tz(order[0].showTime.timeStart, 'HH:mm YYYY-MM-DD', 'Asia/Ho_Chi_Minh'), momentTimezone.tz(new Date(), 'HH:mm YYYY-MM-DD', 'Asia/Ho_Chi_Minh'));
+
+    const test = momentTimezone
+        .tz(order[0].showTime.timeStart, 'HH:mm YYYY-MM-DD', 'Asia/Ho_Chi_Minh')
+        .isAfter(momentTimezone.tz(new Date(), 'HH:mm  YYYY-MM-DD', 'Asia/Ho_Chi_Minh'))
+
+    if (test) {
+        return res.status(400).json({
+            message: "Vé của bạn hiện vẫn chưa đến giờ suất chiếu của phim này.",
+        })
+    }
+    try {
+        
         const data = await CommentModel.create(req.body)
         res.status(200).json(data)
     } catch (error) {

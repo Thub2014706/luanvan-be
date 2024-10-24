@@ -233,11 +233,16 @@ const listFilmByTheater = async (req, res) => {
 const searchFilm = async (req, res) => {
     const {search} = req.query
     try {
+        
         const allFilm = await FilmModel.find({status: true})
+        const allFilmSchedule = await Promise.all(allFilm.map(async item => {
+            const test = await ScheduleModel.findOne({film: item._id, $or: [{type: typeSchedule[1]}, {type: typeSchedule[2]}]})
+            return test ? item : null
+        }))
+        const filmFinal = allFilmSchedule.filter(item => item !== null)
         const allTheater = await TheaterModel.find({status: true})
-        // const all = [...allFilm, ...allTheater]
         const searchAllFilm = await Promise.all(
-            allFilm.map(async (item) => {
+            filmFinal.map(async (item) => {
                 const searchStrings = [item.name, item.description];
 
                 const matchesSearch = searchStrings.some(any => 

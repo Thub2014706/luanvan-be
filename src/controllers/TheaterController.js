@@ -1,11 +1,13 @@
 const RoomModel = require("../models/RoomModel")
+const SeatModel = require("../models/SeatModel")
 const TheaterModel = require("../models/TheaterModel")
 
 const addTheater = async (req, res) => {
     const { name, address, province, district, ward } = req.body
+    const image = req.file?.filename
 
     const existing = await TheaterModel.findOne({ name: name, isDelete: false })
-    if (!name || !address || !province || !district || !ward ) {
+    if (!name || !image || !address || !province || !district || !ward ) {
         return res.status(400).json({
             message: "Nhập đầy đủ thông tin"
         })
@@ -16,7 +18,7 @@ const addTheater = async (req, res) => {
         })
     }
     try {
-        const data = await TheaterModel.create(req.body)
+        const data = await TheaterModel.create({...req.body, image})
         res.status(200).json(data)
     } catch (error) {
         console.log(error)
@@ -28,14 +30,15 @@ const addTheater = async (req, res) => {
 
 const updateTheater = async (req, res) => {
     const id = req.params.id
-    const { name, address, province, district, ward } = req.body
+    const { name, address, province, district, ward, imageId } = req.body
+    const image = imageId ? imageId : req.file.filename
 
     const existing = await TheaterModel.findOne({
         _id: { $ne: id },
         name: name,
         isDelete: false
     });
-    if (!name || !address || !province || !district || !ward ) {
+    if (!name || !image || !address || !province || !district || !ward ) {
         return res.status(400).json({
             message: "Nhập đầy đủ thông tin"
         })
@@ -46,10 +49,10 @@ const updateTheater = async (req, res) => {
         })
     }
     try {
-        const data = await TheaterModel.findByIdAndUpdate(id, req.body, { new: true })
-        console.log(rooms)
+        const data = await TheaterModel.findByIdAndUpdate(id, {name, address, province, district, ward, image}, { new: true })
         res.status(200).json(data)
     } catch (error) {
+        console.log(error)
         res.status(500).json({
             message: "Đã có lỗi xảy ra",
         })
@@ -172,6 +175,36 @@ const listTheaterByProvince = async (req, res) => {
     }
 }
 
+const lengthRoomByTheater = async (req, res) => {
+    const {id} = req.params
+    try {
+        const data = await RoomModel.countDocuments({isDelete: false, theater: id});
+        res.status(200).json(data)
+    } catch (error) {
+        res.status(500).json({
+            message: "Đã có lỗi xảy ra",
+        })
+    }
+}
+
+const lengthSeatByTheater = async (req, res) => {
+    const {id} = req.params
+    try {
+        const data = await RoomModel.find({isDelete: false, theater: id});
+        const seats = await Promise.all(data.map(async item => {
+            const num = await SeatModel.countDocuments({isDelete: false, room: item._id});
+            return num
+        }))
+        const length = seats.reduce((a, b) => a + b, 0)
+        res.status(200).json(length)
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            message: "Đã có lỗi xảy ra",
+        })
+    }
+}
+
 module.exports = {
     addTheater,
     updateTheater,
@@ -181,5 +214,7 @@ module.exports = {
     allTheater,
     listTheater,
     listProvince,
-    listTheaterByProvince
+    listTheaterByProvince,
+    lengthRoomByTheater,
+    lengthSeatByTheater
 }
