@@ -62,11 +62,12 @@ const updateTheater = async (req, res) => {
 const deleteTheater = async (req, res) => {
     const id = req.params.id
     try {
-        const existing = await RoomModel.find({theater: id, isDelete: false})
+        const existing = await RoomModel.find({theater: id})
+        await RoomModel.findOneAndUpdate({theater: id}, {isDelete: true})
         await Promise.all(existing.map(async item => 
-            await RoomModel.findByIdAndDelete(item._id))
+            await SeatModel.findOneAndUpdate({room: item._id}, {isDelete: true}))
         )
-        await TheaterModel.findByIdAndUpdate({_id: id}, {isDelete: true}, {new: true})
+        await TheaterModel.findByIdAndUpdate(id, {isDelete: true}, {new: true})
         res.status(200).json({
             message: 'Xóa thành công'
         })

@@ -3,6 +3,7 @@ const CommentModel = require("../models/CommentModel")
 const momentTimezone = require("moment-timezone")
 const OrderTicketModel = require("../models/OrderTicketModel")
 const { typePay } = require("../constants")
+const moment = require('moment');
 
 const addComment = async (req, res) => {
     const { user, film } = req.body
@@ -48,12 +49,12 @@ const addComment = async (req, res) => {
         .sort((a, b) => new Date(a.showTime.date).getTime() - new Date(b.showTime.date).getTime());    
     // console.log(order);
     
-    // console.log(momentTimezone
-    //             .tz(order[0].showTime.timeStart, 'HH:mm YYYY-MM-DD', 'Asia/Ho_Chi_Minh'), momentTimezone.tz(new Date(), 'HH:mm YYYY-MM-DD', 'Asia/Ho_Chi_Minh'));
-
+    const dateShowTime = moment(order[0].showTime.date).format('YYYY-MM-DD')
+    // console.log(order[0].showTime.date,momentTimezone
+    //             .tz(`${dateShowTime} ${order[0].showTime.timeStart}`, 'Asia/Ho_Chi_Minh'), momentTimezone.tz(new Date(), 'Asia/Ho_Chi_Minh'));
     const test = momentTimezone
-        .tz(order[0].showTime.timeStart, 'HH:mm YYYY-MM-DD', 'Asia/Ho_Chi_Minh')
-        .isAfter(momentTimezone.tz(new Date(), 'HH:mm  YYYY-MM-DD', 'Asia/Ho_Chi_Minh'))
+        .tz(`${dateShowTime} ${order[0].showTime.timeStart}`, 'Asia/Ho_Chi_Minh')
+        .isAfter(momentTimezone.tz(new Date(), 'Asia/Ho_Chi_Minh'))
 
     if (test) {
         return res.status(400).json({

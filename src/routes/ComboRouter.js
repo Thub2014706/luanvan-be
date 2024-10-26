@@ -8,8 +8,8 @@ router.post('/', middlewares.comboAccuracy, upload.single("image"), comboControl
 router.put('/update/:id', middlewares.comboAccuracy, upload.single("image"), comboController.updateCombo);
 router.get('/detail/:id', comboController.detailCombo);
 router.get('/', comboController.allCombo);
-router.patch('/status/:id', middlewares.comboAccuracy, comboController.statusCombo);
-router.delete('/:id', middlewares.comboAccuracy, comboController.deleteCombo);
+// router.patch('/status/:id', middlewares.comboAccuracy, comboController.statusCombo);
+router.patch('/:id', middlewares.comboAccuracy, comboController.deleteCombo);
 router.get('/list', comboController.listCombo);
 
 module.exports = router

@@ -8,7 +8,8 @@ const DiscountSchema = new mongoose.Schema({
     used: { type: Number, required: true, default: 0 },
     startDate: { type: Date, required: true },
     endDate: { type: Date, required: true },
-    status: { type: Boolean, required: true, default: false },
+    isDelete: { type: Boolean, required: true, default: false },
+    // status: { type: Boolean, required: true, default: false },
 }, {
     timestamps: true 
 });

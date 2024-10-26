@@ -8,7 +8,8 @@ const ComboSchema = new mongoose.Schema({
         food: { type: mongoose.Schema.Types.ObjectId, ref: 'Food', required: true},
         quantity: { type: Number, required: true },
     }],
-    status: { type: Boolean, required: true, default: false },
+    isDelete: { type: Boolean, required: true, default: false },
+    // status: { type: Boolean, required: true, default: false },
 }, {
     timestamps: true 
 });

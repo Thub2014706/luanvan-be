@@ -29,7 +29,7 @@ const addFood = async (req, res) => {
 const allFood = async (req, res) => {
     const {search, number, show} = req.query
     try {
-        const all = await FoodModel.find({}).sort({createdAt: -1})
+        const all = await FoodModel.find({isDelete: false}).sort({createdAt: -1})
         const searchAll = all.filter(item => item.name.normalize('NFD')
         .replace(/[\u0300-\u036f]/g, '')
         .toLowerCase()
@@ -96,24 +96,24 @@ const detailFood = async (req, res) => {
     }
 }
 
-const statusFood = async (req, res) => {
-    const id = req.params.id
-    try {
-        const existing = await FoodModel.findById(id);
-        const data = await FoodModel.findByIdAndUpdate(id, {status: !existing.status}, { new: true })
-        res.status(200).json(data)
-    } catch (error) {
-        console.log(error)
-        res.status(500).json({
-            message: "Đã có lỗi xảy ra",
-        })
-    }
-}
+// const statusFood = async (req, res) => {
+//     const id = req.params.id
+//     try {
+//         const existing = await FoodModel.findById(id);
+//         const data = await FoodModel.findByIdAndUpdate(id, {status: !existing.status}, { new: true })
+//         res.status(200).json(data)
+//     } catch (error) {
+//         console.log(error)
+//         res.status(500).json({
+//             message: "Đã có lỗi xảy ra",
+//         })
+//     }
+// }
 
 const deleteFood = async (req, res) => {
     const id = req.params.id
     try {
-        const data = await FoodModel.findOneAndDelete({_id: id})
+        const data = await FoodModel.findByIdAndUpdate(id, {isDelete: true})
         res.status(200).json({
             message: 'Xóa thành công'
         })
@@ -126,7 +126,8 @@ const deleteFood = async (req, res) => {
 
 const listFood = async (req, res) => {
     try {
-        const data = await FoodModel.find({status: true})
+        // const data = await FoodModel.find({status: true})
+        const data = await FoodModel.find({isDelete: false})
         res.status(200).json(data)
     } catch (error) {
         res.status(500).json({
@@ -141,7 +142,7 @@ module.exports = {
     allFood,
     updateFood,
     detailFood,
-    statusFood,
+    // statusFood,
     deleteFood,
     listFood
 }

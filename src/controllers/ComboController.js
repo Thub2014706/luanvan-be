@@ -32,7 +32,7 @@ const addCombo = async (req, res) => {
 const allCombo = async (req, res) => {
     const {search, number, show} = req.query
     try {
-        const all = await ComboModel.find({}).sort({createdAt: -1})
+        const all = await ComboModel.find({isDelete: false}).sort({createdAt: -1})
 
         const searchAll = await Promise.all(
             all.map(async (item) => {
@@ -109,24 +109,24 @@ const detailCombo = async (req, res) => {
     }
 }
 
-const statusCombo = async (req, res) => {
-    const id = req.params.id
-    try {
-        const existing = await ComboModel.findById(id);
-        const data = await ComboModel.findByIdAndUpdate(id, {status: !existing.status}, { new: true })
-        res.status(200).json(data)
-    } catch (error) {
-        console.log(error)
-        res.status(500).json({
-            message: "Đã có lỗi xảy ra",
-        })
-    }
-}
+// const statusCombo = async (req, res) => {
+//     const id = req.params.id
+//     try {
+//         const existing = await ComboModel.findById(id);
+//         const data = await ComboModel.findByIdAndUpdate(id, {status: !existing.status}, { new: true })
+//         res.status(200).json(data)
+//     } catch (error) {
+//         console.log(error)
+//         res.status(500).json({
+//             message: "Đã có lỗi xảy ra",
+//         })
+//     }
+// }
 
 const deleteCombo = async (req, res) => {
     const id = req.params.id
     try {
-        const data = await ComboModel.findOneAndDelete({_id: id})
+        await ComboModel.findByIdAndUpdate(id, {isDelete: true})
         res.status(200).json({
             message: 'Xóa thành công'
         })
@@ -139,7 +139,8 @@ const deleteCombo = async (req, res) => {
 
 const listCombo = async (req, res) => {
     try {
-        const data = await ComboModel.find({status: true}).sort({createdAt: -1})
+        // const data = await ComboModel.find({status: true}).sort({createdAt: -1})
+        const data = await ComboModel.find({isDelete: false}).sort({createdAt: -1})
         res.status(200).json(data)
     } catch (error) {
         res.status(500).json({
@@ -154,7 +155,7 @@ module.exports = {
     allCombo,
     updateCombo,
     detailCombo,
-    statusCombo,
+    // statusCombo,
     deleteCombo,
     listCombo
 }

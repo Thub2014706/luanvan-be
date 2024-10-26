@@ -145,7 +145,7 @@ const constAllOrder = async (theater) => {
             }).populate({
                 path: 'member',
                 model: 'User',
-                select: 'username'
+                // select: 'username'
             }).populate({
                 path: 'staff',
                 model: 'Staff',
@@ -168,7 +168,7 @@ const constAllOrder = async (theater) => {
         const data2 = await OrderComboModel.find({status: typePay[1]}).populate({
             path: 'member',
             model: 'User',
-            select: 'username'
+            // select: 'username'
         }).populate({
             path: 'staff',
             model: 'Staff',
@@ -313,6 +313,7 @@ const exportReport = async (req, res) => {
 
         const finalData = await constAllOrder(theater)
         const sheet = wordBook.addWorksheet("orders")
+        sheet.rowCount
         sheet.columns = [
             {header: 'Mã vé', key: 'idOrder', width: 25},
             {header: 'Tên phim', key: 'film', width: 25},
@@ -329,6 +330,14 @@ const exportReport = async (req, res) => {
             {header: 'Điểm tích lũy', key: 'point', width: 25},
             {header: 'Tổng thanh toán', key: 'price', width: 25},
         ]
+        sheet.getRow(1).eachCell((cell) => {
+            cell.font = { bold: true };
+            cell.fill = { 
+                type: 'pattern', 
+                pattern: 'solid', 
+                fgColor: { argb: 'FFD3D3D3' } 
+            };
+        });
 
         finalData.map((value, idx) => {
             let seatString = ''
@@ -369,7 +378,7 @@ const exportReport = async (req, res) => {
         );
         res.setHeader(
             "Content-Disposition",
-            "attachment;filename=" + "danh_sach_ve.xlsx"
+            "attachment;filename=" + "danh_sach_ve_da_hoan_tat.xlsx"
         );
 
         await wordBook.xlsx.write(res).then(() => res.end());
