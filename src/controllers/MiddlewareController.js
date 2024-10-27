@@ -226,6 +226,9 @@ const EventAccuracy = accuracy(allAccess[18])
 // người dùng là admin hoặc News
 const NewsAccuracy = accuracy(allAccess[19])
 
+// người dùng là admin hoặc information
+const InformationAccuracy = accuracy(allAccess[21])
+
 module.exports = { 
     userAccuracy, 
     userAdminAccuracy, 
@@ -248,5 +251,6 @@ module.exports = {
     printAccuracy,
     AdvertisementAccuracy,
     EventAccuracy,
-    NewsAccuracy
+    NewsAccuracy,
+    InformationAccuracy
 }

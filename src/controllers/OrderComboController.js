@@ -24,7 +24,7 @@ const addOrderCombo = async (req, res) => {
         }
         if (member.toString() !== '' && status === typePay[1]) {
             const user = await UserModel.findById(member)
-            updateUserPoints(user, price)
+            updateUserPoints(user, price, 'combo')
             if (discount) {
                 await DiscountModel.findByIdAndUpdate(discount.id, { $inc: { used: 1 } }, {new: true})
             }

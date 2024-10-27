@@ -31,9 +31,9 @@ const addTicketRefund = async (req, res) => {
             })
         }
     } else {
-        if (result.length === 5) {
+        if (result.length === 3) {
             return res.status(400).json({
-                message: 'Bạn đã hoàn vé đủ 5 lần trong tháng này!'
+                message: 'Bạn đã hoàn vé đủ 3 lần trong tháng này!'
             })
         }
     }

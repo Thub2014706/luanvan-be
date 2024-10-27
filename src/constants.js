@@ -24,7 +24,9 @@ const allAccess = {
     16: 'In vé',
     17: 'Quảng cáo',
     18: 'Sự kiện',
-    19: 'Tin tức'
+    19: 'Tin tức',
+    20: 'Hỗ trợ',
+    21: 'Thông tin'
 }
 
 const typeSurcharge = {

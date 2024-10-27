@@ -252,7 +252,7 @@ const callback = async (req, res, model, type) => {
                     await DiscountModel.findByIdAndUpdate(detailOrder.discount.id, { $inc: { used: 1 } }, {new: true})
                 }
                 // cap nhat point
-                updateUserPoints(user, detailOrder.price)
+                type === 'combo' ? updateUserPoints(user, detailOrder.price, 'combo') : updateUserPoints(user, detailOrder.price, 'ticket')
 
                 // gui mail
                 if (!detailOrder.staff) {

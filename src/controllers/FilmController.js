@@ -16,6 +16,12 @@ const addFilm = async (req, res) => {
             message: "Yêu cầu nhập đầy đủ thông tin"
         })
     }
+    if (endDate < releaseDate) {
+        return res.status(400).json({
+            message: "Ngày kết thúc không thể sớm hơn ngày phát hành"
+        })
+    }
+
     try {
         const data = await FilmModel.create({...req.body, image: image})
         res.status(200).json(data)

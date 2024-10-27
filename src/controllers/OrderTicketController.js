@@ -15,11 +15,11 @@ const excelJS = require('exceljs');
 const fs = require('fs');
 const moment = require('moment');
 
-const updateUserPoints = async (user, price) => {
+const updateUserPoints = async (user, price, type) => {
     const allOrderTicket = await OrderTicketModel.find({member: user._id, status: typePay[1]})
     const allOrderCombo = await OrderComboModel.find({member: user._id, status: typePay[1]})
     const allOrder = [...allOrderTicket, ...allOrderCombo]
-    let pointMultiplier = user.level === 1 ? 0.05 : 0.07;
+    let pointMultiplier = type === 'combo' ? (user.level === 1 ? 0.03 : 0.04) : (user.level === 1 ? 0.05 : 0.07);
     const sumPoint = user.point + (pointMultiplier * price)
     let getPoint
     if (sumPoint % 1000 >= 1 && sumPoint % 1000 <= 499) {
@@ -60,7 +60,7 @@ const addOrderTicket = async (req, res) => {
         }
         if (member.toString() !== '' && status === typePay[1]) {
             const user = await UserModel.findById(member)
-            updateUserPoints(user, price)
+            updateUserPoints(user, price, 'ticket')
             if (discount) {
                 await DiscountModel.findByIdAndUpdate(discount.id, { $inc: { used: 1 } }, {new: true})
             }

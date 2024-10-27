@@ -14,6 +14,25 @@ const addDiscount = async (req, res) => {
             message: "Tên hoặc mã khuyến mãi đã tồn tại"
         })
     }
+
+    if (endDate < startDate) {
+        return res.status(400).json({
+            message: "Ngày kết thúc không thể sớm hơn ngày bắt đầu"
+        })
+    }
+
+    if (new Date(startDate) < new Date().setUTCHours(0, 0, 0, 0)) {
+        return res.status(400).json({
+            message: "Ngày bắt đầu không thể sớm hơn hôm nay"
+        });
+    }
+    
+    if (new Date(endDate).getTime() < new Date().setUTCHours(0, 0, 0, 0)) {
+        return res.status(400).json({
+            message: "Ngày kết thúc không thể sớm hơn hôm nay"
+        });
+    }
+    
     try {
         const data = await DiscountModel.create(req.body)
         res.status(200).json(data)
