@@ -165,6 +165,25 @@ const listDiscount = async (req, res) => {
     }
 }
 
+const listDiscountFuture = async (req, res) => {
+    try {
+        const now = new Date().setUTCHours(0, 0, 0, 0)
+        const data = await DiscountModel.find({isDelete: false, endDate: {$gte: now}})
+        // const data = await DiscountModel.find({status: true, startDate: {$lte: now}, endDate: {$gte: now}})
+        const bigData = data.map(item => {
+            return item.quantity - item.used > 0 ? item : null
+        })
+        const filter = bigData.filter(item => item !== null)
+        // console.log(filter);
+        res.status(200).json(filter)
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            message: "Đã có lỗi xảy ra",
+        })
+    }
+}
+
 
 module.exports = {
     addDiscount,
@@ -173,5 +192,6 @@ module.exports = {
     detailDiscount,
     // statusDiscount,
     deleteDiscount,
-    listDiscount
+    listDiscount,
+    listDiscountFuture
 }

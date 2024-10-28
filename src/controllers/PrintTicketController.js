@@ -1,6 +1,7 @@
 const { statusTicket } = require("../constants")
 const OrderTicketModel = require("../models/OrderTicketModel")
 const PrintTicketModel = require("../models/PrintTicketModel")
+const ScanTicketModel = require("../models/ScanTicketModel")
 const ShowTimeModel = require("../models/ShowTimeModel")
 
 const addPrintTicket = async (req, res) => {
@@ -20,20 +21,22 @@ const testPrintTicket = async (req, res) => {
 
     try {        
         const existing = await PrintTicketModel.findOne({order: id})
+        const existingScan = await ScanTicketModel.findOne({order: id})
         const ticket = await OrderTicketModel.findById(id)
         const showTime = await ShowTimeModel.findById(ticket.showTime)
         const now = new Date()
         // const date = now.setUTCHours(0,0,0,0)
         const hours = now.getHours()
         const minutes = now.getMinutes()
-        const [hoursStart, minutesStart] = showTime.timeStart.split(':').map(Number);
-        console.log(hours, minutes, hoursStart, minutesStart);
+        const [hoursEnd, minutesEnd] = showTime.timeEnd.split(':').map(Number);
+        // console.log(hours, minutes, hoursStart, minutesStart);
         if (
             existing || 
+            existingScan ||
             ticket.staff || 
             (new Date(showTime.date).setUTCHours(0,0,0,0) < now.setUTCHours(0,0,0,0)) || 
             (new Date(showTime.date).setUTCHours(0,0,0,0) === now.setUTCHours(0,0,0,0) && 
-                (hours > hoursStart || (hours === hoursStart && minutes > minutesStart))
+                (hours > hoursEnd || (hours === hoursEnd && minutes > minutesEnd))
             )
         ) {
             return res.status(200).json({message: statusTicket[0]})

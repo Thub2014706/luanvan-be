@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const PrintTicketSchema = new mongoose.Schema({
-    order: { type: mongoose.Schema.Types.ObjectId, ref: 'Order', required: true},
+    order: { type: mongoose.Schema.Types.ObjectId, ref: 'OrderTicket', required: true},
 }, {
     timestamps: true 
 });

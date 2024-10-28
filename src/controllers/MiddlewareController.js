@@ -220,7 +220,7 @@ const printAccuracy = accuracy(allAccess[16])
 // người dùng là admin hoặc Advertisement
 const AdvertisementAccuracy = accuracy(allAccess[17])
 
-// người dùng là admin hoặc Advertisement
+// người dùng là admin hoặc event
 const EventAccuracy = accuracy(allAccess[18])
 
 // người dùng là admin hoặc News
@@ -228,6 +228,9 @@ const NewsAccuracy = accuracy(allAccess[19])
 
 // người dùng là admin hoặc information
 const InformationAccuracy = accuracy(allAccess[21])
+
+// người dùng là admin hoặc scanticket
+const scanTiketAccuracy = accuracy(allAccess[21])
 
 module.exports = { 
     userAccuracy, 
@@ -252,5 +255,6 @@ module.exports = {
     AdvertisementAccuracy,
     EventAccuracy,
     NewsAccuracy,
-    InformationAccuracy
+    InformationAccuracy,
+    scanTiketAccuracy
 }

@@ -11,5 +11,6 @@ router.get('/', discountController.allDiscount);
 // router.patch('/status/:id', middlewares.discountAccuracy, discountController.statusDiscount);
 router.patch('/:id', middlewares.discountAccuracy, discountController.deleteDiscount);
 router.get('/list', discountController.listDiscount);
+router.get('/list-future', discountController.listDiscountFuture);
 
 module.exports = router
