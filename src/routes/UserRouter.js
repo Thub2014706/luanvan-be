@@ -7,8 +7,8 @@ const router = express.Router()
 
 router.post('/signup', userController.register);
 router.post('/signin', authController.loginUser);
-router.post('/refresh-token', authController.refreshToken);
-router.post('/logout', middlewares.userAccuracy, authController.logout);
+router.post('/refresh-token', authController.refreshTokenUser);
+router.post('/logout', middlewares.userAccuracy, authController.logoutUser);
 router.get('/', userController.allUser);
 router.patch('/status/:id', middlewares.userAdminAccuracy, userController.statusUser);
 router.get('/detail-by-phone', userController.detailUserByPhone);

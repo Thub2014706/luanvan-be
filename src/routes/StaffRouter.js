@@ -7,8 +7,8 @@ const router = express.Router()
 
 router.post('/create', middlewares.staffAccuracy, upload.single("avatar"), staffController.createStaff);
 router.post('/signin', authController.loginStaff);
-router.post('/refresh-token', authController.refreshToken);
-router.post('/logout', middlewares.userAccuracy, authController.logout);
+router.post('/refresh-token', authController.refreshTokenStaff);
+router.post('/logout', middlewares.userAccuracy, authController.logoutStaff);
 router.get('/', staffController.allStaff);
 router.patch('/status/:id', middlewares.staffAccuracy, staffController.statusStaff);
 router.get('/detail/:id', staffController.detailStaff);

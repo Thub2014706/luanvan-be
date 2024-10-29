@@ -230,7 +230,10 @@ const NewsAccuracy = accuracy(allAccess[19])
 const InformationAccuracy = accuracy(allAccess[21])
 
 // người dùng là admin hoặc scanticket
-const scanTiketAccuracy = accuracy(allAccess[21])
+const scanTiketAccuracy = accuracy(allAccess[22])
+
+// người dùng là admin hoặc popup
+const popupAccuracy = accuracy(allAccess[23])
 
 module.exports = { 
     userAccuracy, 
@@ -256,5 +259,6 @@ module.exports = {
     EventAccuracy,
     NewsAccuracy,
     InformationAccuracy,
-    scanTiketAccuracy
+    scanTiketAccuracy,
+    popupAccuracy
 }

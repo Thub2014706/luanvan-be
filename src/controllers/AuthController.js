@@ -4,20 +4,23 @@ const bcrypt = require('bcrypt')
 const StaffModel = require('../models/StaffModel')
 
 const accuracyAccessToken = (data) => {
-    return jwt.sign(data, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '3h' })
+    return jwt.sign(data, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '30s' })
 }
 
 const accuracyRefreshToken = (data) => {
-    return jwt.sign(data, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '1d' })
+    return jwt.sign(data, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '5m' })
 }
 
 let refreshTokens = []
+let refreshTokensAdmin = []
 
-const login = async (req, res, model) => {
+const login = async (req, res, model, type, string) => {
     const { info, password } = req.body
     // const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,20}$/;
     // const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
+    // console.log(type);
+    
     const existingUser = await model.findOne({
         $or: [{username: info}, {phone: info}, {email: info} ], isDelete: false
     })
@@ -62,8 +65,8 @@ const login = async (req, res, model) => {
         }
         const accessToken = accuracyAccessToken(data)
         const refreshToken = accuracyRefreshToken(data)
-        refreshTokens.push(refreshToken)
-        res.cookie('refreshToken', refreshToken, {
+        type.push({ token: refreshToken, userId: data.id })
+        res.cookie(string, refreshToken, {
             httpOnly: true, //bảo vệ cookie khỏi các tấn công XSS.
             secure: false,
             path: '/',
@@ -80,29 +83,27 @@ const login = async (req, res, model) => {
     }
 }
 
-const loginStaff = (req, res) => login(req, res, StaffModel)
+const loginStaff = (req, res) => login(req, res, StaffModel, refreshTokensAdmin, 'refreshTokenAdmin')
 
-const loginUser = (req, res) => login(req, res, UserModel)
+const loginUser = (req, res) => login(req, res, UserModel, refreshTokens, 'refreshTokenUser')
 
 
-const refreshToken = async (req, res) => {
+const refreshToken = async (req, res, type, string) => {
     try {
-        const refresh = req.cookies.refreshToken
+        const refresh = req.cookies[string]
         if (!refresh) {
             return res.status(401).json({
                 message: 'Không nhận được refresh token'
             })
         }
-        if (!refreshTokens.includes(refresh)) {
-            return res.status(403).json({
-                message: 'refresh token không hợp lệ'
-            })
-        }
+        const tokenEntry = type.find(entry => entry.token === refresh);
+        if (!tokenEntry) return res.status(403).json({ message: 'refresh token không hợp lệ' });
+
         jwt.verify(refresh, process.env.REFRESH_TOKEN_SECRET, (err, user) => {
             if (err) {
                 console.log(err)
             }
-            refreshTokens = refreshTokens.filter((token) => token !== refresh)
+            type = type.filter(entry => entry.token !== refresh);
             const data = {
                 id: user.id, 
                 username: user.username,
@@ -112,8 +113,8 @@ const refreshToken = async (req, res) => {
             }
             const newAccessToken = accuracyAccessToken(data)
             const newRefreshToken = accuracyRefreshToken(data)
-            refreshTokens.push(newRefreshToken)
-            res.cookie('refreshToken', newRefreshToken, {
+            type.push({ token: newRefreshToken, userId: user.id });
+            res.cookie(string, newRefreshToken, {
                 httpOnly: true, //bảo vệ cookie khỏi các tấn công XSS.
                 secure: false,
                 path: '/',
@@ -131,17 +132,34 @@ const refreshToken = async (req, res) => {
     }
 }
 
-const logout = async (req, res) => {
-    res.clearCookie('refreshToken')
-    refreshTokens = refreshTokens.filter((token) => token !== req.cookies.refreshToken)
+const refreshTokenStaff = (req, res) => refreshToken(req, res, refreshTokensAdmin, 'refreshTokenAdmin')
+
+const refreshTokenUser = (req, res) => refreshToken(req, res, refreshTokens, 'refreshTokenUser')
+
+const logout = async (req, res, type, string) => {
+    res.clearCookie(string)
+    const refresh = req.cookies[string];
+    
+    // Lọc và cập nhật lại danh sách token toàn cục
+    if (type === refreshTokens) {
+        refreshTokens = refreshTokens.filter(entry => entry.token !== refresh);
+    } else if (type === refreshTokensAdmin) {
+        refreshTokensAdmin = refreshTokensAdmin.filter(entry => entry.token !== refresh);
+    }
     res.status(200).json({
         message: 'Đã đăng xuất'
     })
 }
 
+const logoutStaff = (req, res) => logout(req, res, refreshTokensAdmin, 'refreshTokenAdmin')
+
+const logoutUser = (req, res) => logout(req, res, refreshTokens, 'refreshTokenUser')
+
 module.exports = {
     loginStaff,
     loginUser,
-    refreshToken,
-    logout
+    refreshTokenStaff,
+    refreshTokenUser,
+    logoutStaff,
+    logoutUser
 }
