@@ -18,7 +18,7 @@ dotenv.config();
 
 const io = new Server(server, {
   cors: {
-      origin: ['http://localhost:3000', 'http://localhost:3002'],
+      origin: ['http://localhost:3000', 'http://localhost:3002', 'exp://192.168.1.7:8081', 'http://192.168.1.7:8081'],
       credentials: true
   }
 })
@@ -70,6 +70,7 @@ io.on("connection", (socket) => {
     socket.on('join', (user) => {
         const loadMessages = async () => {
             try {             
+                console.log('join')
                 if (!userInRoom[user]) {
                     userInRoom[user] = new Set();
                 }
@@ -179,7 +180,8 @@ mongoose.connect(process.env.DB_CONNECTION_STRING)
 .then(() => console.log('Connected!'))
 .catch((error) => console.error('Connection error:', error));
 
-app.use(cors({credentials: true, origin: ['http://localhost:3000', 'http://localhost:3002'],}));
+app.use(cors({credentials: true, origin: ['http://localhost:3000', 'http://localhost:3002', 'exp://192.168.1.7:8081', 'http://192.168.1.7:8081'],}));
+
 app.use(cookieParser())
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());

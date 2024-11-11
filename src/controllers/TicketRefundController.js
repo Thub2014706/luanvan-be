@@ -50,10 +50,17 @@ const addTicketRefund = async (req, res) => {
             message: 'Vé này có sử dụng khuyến mãi!'
         })
     }
+
     
-    if (momentTimezone
+    
+    // console.log(momentTimezone
+    //     .tz(now, 'YYYY-MM-DD HH:mm', 'Asia/Ho_Chi_Minh'), momentTimezone.tz(newTime, 'YYYY-MM-DD HH:mm', 'Asia/Ho_Chi_Minh'));
+    if ((now.setUTCHours(0, 0, 0, 0) === new Date(showTime.date).setUTCHours(0, 0, 0, 0) &&
+        momentTimezone
         .tz(now, 'HH:mm', 'Asia/Ho_Chi_Minh')
-        .isAfter(momentTimezone.tz(newTime, 'HH:mm', 'Asia/Ho_Chi_Minh'))
+        .isAfter(momentTimezone.tz(newTime, 'HH:mm', 'Asia/Ho_Chi_Minh')) || (
+            now.setUTCHours(0, 0, 0, 0) > new Date(showTime.date).setUTCHours(0, 0, 0, 0)
+        ))
     ) {
         return res.status(400).json({
             message: 'Đã quá thời gian hoàn vé!'
@@ -184,7 +191,7 @@ const constAllOrder = async (theater) => {
                 model: 'Food',
                 select: 'name'
             }]
-        })
+        });
 
         let finalData
         if (theater) {
@@ -193,7 +200,7 @@ const constAllOrder = async (theater) => {
             finalData = data
         }
 
-        return finalData
+        return finalData.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
         
     } catch (error) {
         console.log('ee0', error)
@@ -205,10 +212,10 @@ const constAllOrder = async (theater) => {
 
 const allOrderTicketRefund = async (req, res) => {
     const {theater, number, show} = req.query
-    console.log(theater);
+    // console.log(theater);
     
     try {
-        const finalData = await constAllOrder(theater)
+        const finalData = await constAllOrder(theater).sort((a, b) => b.createdAt - a.createdAt);
 
         const start = (parseInt(number) - 1) * parseInt(show)
         const end = start + parseInt(show);

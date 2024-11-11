@@ -5,6 +5,7 @@ const router = express.Router()
 
 router.post('/payment-ticket', momoController.momoTicket);
 router.post('/payment-ticket-customer', momoController.momoTicketCustomer);
+router.post('/payment-ticket-native', momoController.momoTicketNative);
 router.post('/payment-combo', momoController.momoCombo);
 router.post('/payment-combo-customer', momoController.momoComboCustomer);
 router.post('/callback-ticket', momoController.callbackTicket);

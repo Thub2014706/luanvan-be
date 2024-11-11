@@ -29,7 +29,7 @@ const momoPost = async (req, res, urlRedirectUrl, urlIpnUrl) => {
     var orderInfo = 'Thanh toán với MoMo';
     var partnerCode = 'MOMO';
     var redirectUrl = `${urlRedirectUrl}`;
-    var ipnUrl = `https://0aa2-113-174-32-81.ngrok-free.app/api/momo/${urlIpnUrl}`;
+    var ipnUrl = `https://7562-113-182-11-9.ngrok-free.app/api/momo/${urlIpnUrl}`;
     var requestType = "payWithMethod";
     var amount = req.body.amount;
     var orderId = 'CINE' + new Date().getTime();
@@ -97,6 +97,7 @@ const momoPost = async (req, res, urlRedirectUrl, urlIpnUrl) => {
 const momoTicket = async (req, res) => momoPost(req, res, 'http://localhost:3002/book-tickets/success', 'callback-ticket')
 const momoCombo = async (req, res) => momoPost(req, res, 'http://localhost:3002/order-food/success', 'callback-combo')
 const momoTicketCustomer = async (req, res) => momoPost(req, res, 'http://localhost:3000/checkout', 'callback-ticket')
+const momoTicketNative = async (req, res) => momoPost(req, res, 'https://www.momo.vn/', 'callback-ticket')
 const momoComboCustomer = async (req, res) => momoPost(req, res, 'http://localhost:3000/checkout', 'callback-combo')
 
 const mailTicket = async (user, theater, film, sign, showTimeDetail, roomDetail, seatsHTML, seat0, combosHTML, priceHTML, detailOrder, orderId, imgPath ) => {
@@ -399,6 +400,7 @@ const checkStatus = async (req, res) => {
 
 module.exports = {
     momoTicket,
+    momoTicketNative,
     momoCombo,
     callbackTicket,
     callbackCombo,

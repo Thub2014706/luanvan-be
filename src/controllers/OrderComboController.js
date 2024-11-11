@@ -74,7 +74,7 @@ const allOrderByUser = async (req, res) => {
             theater = theaterInfo.name
             const combo = await Promise.all(item.combo.map(async mini => {
                 const com = await ComboModel.findById(mini.id) || await FoodModel.findById(mini.id)
-                if (com.variants) {
+                if (com && com.variants) {
                     const foods = await Promise.all(com.variants.map(async min => {
                         const nameFood = await FoodModel.findById(min.food)
                         return {min, nameFood}
