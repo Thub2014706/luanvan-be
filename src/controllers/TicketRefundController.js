@@ -215,7 +215,7 @@ const allOrderTicketRefund = async (req, res) => {
     // console.log(theater);
     
     try {
-        const finalData = await constAllOrder(theater).sort((a, b) => b.createdAt - a.createdAt);
+        const finalData = await constAllOrder(theater)
 
         const start = (parseInt(number) - 1) * parseInt(show)
         const end = start + parseInt(show);

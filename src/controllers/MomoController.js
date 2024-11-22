@@ -29,7 +29,7 @@ const momoPost = async (req, res, urlRedirectUrl, urlIpnUrl) => {
     var orderInfo = 'Thanh toán với MoMo';
     var partnerCode = 'MOMO';
     var redirectUrl = `${urlRedirectUrl}`;
-    var ipnUrl = `https://7562-113-182-11-9.ngrok-free.app/api/momo/${urlIpnUrl}`;
+    var ipnUrl = `https://48ef-113-161-208-210.ngrok-free.app/api/momo/${urlIpnUrl}`;
     var requestType = "payWithMethod";
     var amount = req.body.amount;
     var orderId = 'CINE' + new Date().getTime();

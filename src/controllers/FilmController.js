@@ -3,10 +3,13 @@ const fs = require('fs');
 const path = require('path');
 const GenreModel = require("../models/GenreModel");
 const ScheduleModel = require("../models/ScheduleModel");
-const { typeSchedule } = require("../constants");
+const { typeSchedule, typePay } = require("../constants");
 const { schedule } = require("node-cron");
 const ShowTimeModel = require("../models/ShowTimeModel");
 const TheaterModel = require("../models/TheaterModel");
+const TicketRefundModel = require("../models/TicketRefundModel")
+const OrderTicketModel = require("../models/OrderTicketModel")
+const { log } = require("console");
 
 const addFilm = async (req, res) => {
     const {name, time, nation, genre, director, releaseDate, endDate, age, performer, trailer, description} = req.body
@@ -246,7 +249,7 @@ const searchFilm = async (req, res) => {
             return test ? item : null
         }))
         const filmFinal = allFilmSchedule.filter(item => item !== null)
-        const allTheater = await TheaterModel.find({status: true})
+        const allTheater = await TheaterModel.find({status: true, isDelete: false})
         const searchAllFilm = await Promise.all(
             filmFinal.map(async (item) => {
                 const searchStrings = [item.name, item.description];
@@ -299,6 +302,70 @@ const searchFilm = async (req, res) => {
     }
 }
 
+const filterFilm = async (req, res) => {
+    const {genre, age, type} = req.query
+
+    // console.log(genre, age);
+    try {
+        const existing = await FilmModel.find({status: true});
+        let all = []
+        for (const item of existing) {
+            const schedule = await ScheduleModel.find({film: item._id, isDelete: false});
+            if (schedule.length > 0) {
+                const hasType1 = schedule.some(item => item.type === type);
+                if (hasType1) {
+                    all.push(item)
+                }
+            }
+        }
+        const setAll = await Promise.all(all.map(async item => {
+            let bool = true
+            if (genre) {
+                const genrePar = JSON.parse(genre)
+                // console.log(genrePar, item.genre);
+                const isSubset = genrePar.every(element => item.genre.includes(element.toString()));
+                bool = bool && isSubset
+            }
+            if (age) {
+                bool = bool && item.age === age
+            }
+            return bool ? item : null
+
+        }))
+        const data = setAll.filter(item => item !== null)
+        
+        res.status(200).json(data)
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({
+            message: "Đã có lỗi xảy ra",
+        })
+    }
+}
+
+const numberTicketFilm = async (req, res) => {
+    const {id} = req.params
+
+    // console.log(genre, age);
+    try {
+        const refund =  await TicketRefundModel.find({})
+        const schedules = await ScheduleModel.find({film: id})
+        const showTimes = await ShowTimeModel.find({schedule: { $in: schedules.map(s => s._id) }})
+        const orders = await OrderTicketModel.find({showTime: { $in: showTimes.map(s => s._id)}, status: typePay[1]})
+        const filter = orders.filter(order => {
+            return !refund.some(ref => ref.order.equals(order._id));
+        });
+        const numberTicket = filter.length
+
+        res.status(200).json(numberTicket)
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({
+            message: "Đã có lỗi xảy ra",
+        })
+    }
+}
+
 module.exports = {
     addFilm,
     getImage,
@@ -310,5 +377,7 @@ module.exports = {
     listFilmBySchedule,
     listFilmByTheater,
     detailFilmBySchedule,
-    searchFilm
+    searchFilm,
+    filterFilm,
+    numberTicketFilm
 }

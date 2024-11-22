@@ -4,7 +4,7 @@ const bcrypt = require('bcrypt')
 const StaffModel = require('../models/StaffModel')
 
 const accuracyAccessToken = (data) => {
-    return jwt.sign(data, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '2h' })
+    return jwt.sign(data, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '10s' })
 }
 
 const accuracyRefreshToken = (data) => {
@@ -65,7 +65,7 @@ const login = async (req, res, model, type, string) => {
         }
         const accessToken = accuracyAccessToken(data)
         const refreshToken = accuracyRefreshToken(data)
-        type.push({ token: refreshToken, userId: data.id })
+        type.push(refreshToken)
         res.cookie(string, refreshToken, {
             httpOnly: true, //bảo vệ cookie khỏi các tấn công XSS.
             secure: false,
@@ -89,21 +89,24 @@ const loginUser = (req, res) => login(req, res, UserModel, refreshTokens, 'refre
 
 
 const refreshToken = async (req, res, type, string) => {
+    
     try {
         const refresh = req.cookies[string]
+        // console.log(type, refresh);
         if (!refresh) {
             return res.status(401).json({
                 message: 'Không nhận được refresh token'
             })
         }
-        const tokenEntry = type.find(entry => entry.token === refresh);
-        if (!tokenEntry) return res.status(403).json({ message: 'refresh token không hợp lệ' });
+        // const tokenEntry = type.find(entry => entry.token === refresh);
+        if (!type.includes(refresh)) return res.status(403).json({ message: 'refresh token không hợp lệ' });
 
         jwt.verify(refresh, process.env.REFRESH_TOKEN_SECRET, (err, user) => {
             if (err) {
                 console.log(err)
             }
-            type = type.filter(entry => entry.token !== refresh);
+            // type = type.filter(entry => entry.token !== refresh);
+            // type = type.filter((token) => token !== refresh);
             const data = {
                 id: user.id, 
                 username: user.username,
@@ -113,7 +116,7 @@ const refreshToken = async (req, res, type, string) => {
             }
             const newAccessToken = accuracyAccessToken(data)
             const newRefreshToken = accuracyRefreshToken(data)
-            type.push({ token: newRefreshToken, userId: user.id });
+            type.push(newRefreshToken);
             res.cookie(string, newRefreshToken, {
                 httpOnly: true, //bảo vệ cookie khỏi các tấn công XSS.
                 secure: false,

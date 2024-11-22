@@ -6,6 +6,8 @@ const DiscountSchema = new mongoose.Schema({
     percent: { type: Number, required: true },
     quantity: { type: Number, required: true },
     used: { type: Number, required: true, default: 0 },
+    minium: { type: Number, required: true, default: 0 },
+    level: { type: Number, required: true },
     startDate: { type: Date, required: true },
     endDate: { type: Date, required: true },
     isDelete: { type: Boolean, required: true, default: false },
