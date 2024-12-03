@@ -9,5 +9,6 @@ router.get('/detail/:id', scheduleController.detailSchedule);
 router.put('/update/:id', middlewares.scheduleAccuracy, scheduleController.updateSchedule);
 router.get('/list', scheduleController.listSchedule);
 router.get('/list-schedule-not-screened', scheduleController.listScheduleNotEd);
+router.patch('/delete-schedule/:id', middlewares.scheduleAccuracy, scheduleController.deleteSchedule);
 
 module.exports = router

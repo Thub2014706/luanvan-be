@@ -1,4 +1,5 @@
 const SeatModel = require("../models/SeatModel")
+const OrderTicketModel = require("../models/OrderTicketModel")
 
 const updateRow = async (req, res) => {
     const {numRow, room, type, status, bottom} = req.body
@@ -67,11 +68,20 @@ const updateSeat = async (req, res) => {
 const deleteSeat = async (req, res) => {
     const id = req.params.id
     try {
-        await SeatModel.findByIdAndUpdate(id, {isDelete: true})
-        res.status(200).json({
-            message: 'Xóa thành công'
-        })
+        const existing = await OrderTicketModel.findOne({ seat: { $in: [id] } })
+        if (existing) {
+            res.status(400).json({
+                message: 'Không thể xóa ghế vì ràng buộc khóa ngoại với các dữ liệu liên quan.'
+            })
+        } else {
+            await SeatModel.findByIdAndUpdate(id, {isDelete: true})
+            res.status(200).json({
+                message: 'Xóa thành công'
+            })
+        }
     } catch (error) {
+        console.log(error);
+        
         res.status(500).json({
             message: "Đã có lỗi xảy ra",
         })

@@ -28,6 +28,7 @@ const EventRouter = require('./EventRouter')
 const NewsRouter = require('./NewsRouter')
 const InformationRouter = require('./InformationRouter')
 const PopupRouter = require('./PopupRouter')
+const PointHistoryRouter = require('./PointHistoryRouter')
 
 const routes = (app) => {
     app.use('/api/user/', userRouter)
@@ -60,6 +61,7 @@ const routes = (app) => {
     app.use('/api/news/', NewsRouter)
     app.use('/api/information/', InformationRouter)
     app.use('/api/popup/', PopupRouter)
+    app.use('/api/point-history/', PointHistoryRouter)
 
 }
 

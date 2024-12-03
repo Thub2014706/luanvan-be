@@ -1,5 +1,8 @@
 const bcrypt = require('bcrypt')
-const StaffModel = require('../models/StaffModel')
+const StaffModel = require('../models/StaffModel');
+const OrderTicketModel = require('../models/OrderTicketModel');
+const OrderComboModel = require('../models/OrderComboModel');
+const NewsModel = require("../models/NewsModel")
 
 const createStaff = async (req, res) => {
     const { username, email, phone, password, confirmPassword, theater } = req.body
@@ -121,16 +124,25 @@ const deleteStaff = async (req, res) => {
     const id = req.params.id
     try {
         const existing = await StaffModel.findById(id)
-        console.log('aa',existing)
-        if (existing.role === 0) {
+        const existingTicket = await OrderTicketModel.findOne({staff: id})
+        const existingCombo = await OrderComboModel.findOne({staff: id})
+        const existingNews = await NewsModel.findOne({staff: id})
+        // console.log('aa',existing)
+        if (existingCombo || existingNews || existingTicket) {
             res.status(400).json({
-                message: 'Không thể xóa người dùng Admin'
+                message: 'Không thể xóa nhân viên vì ràng buộc khóa ngoại với các dữ liệu liên quan.'
             })
         } else {
-            await StaffModel.findByIdAndUpdate({_id: id}, {isDelete: true}, {new: true})
-            res.status(200).json({
-                message: 'Xóa thành công'
-            })
+            if (existing.role === 0) {
+                res.status(400).json({
+                    message: 'Không thể xóa người dùng Admin'
+                })
+            } else {
+                await StaffModel.findByIdAndUpdate({_id: id}, {isDelete: true}, {new: true})
+                res.status(200).json({
+                    message: 'Xóa thành công'
+                })
+            }
         }
     } catch (error) {
         console.log(error)

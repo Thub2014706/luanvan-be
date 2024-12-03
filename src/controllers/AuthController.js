@@ -4,7 +4,7 @@ const bcrypt = require('bcrypt')
 const StaffModel = require('../models/StaffModel')
 
 const accuracyAccessToken = (data) => {
-    return jwt.sign(data, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '10s' })
+    return jwt.sign(data, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '4h' })
 }
 
 const accuracyRefreshToken = (data) => {

@@ -1,4 +1,4 @@
-const { typePay, signAge, standardAge } = require("../constants")
+const { typePay, signAge, standardAge, pointHis } = require("../constants")
 const SeatModel = require("../models/SeatModel")
 const UserModel = require("../models/UserModel")
 const OrderTicketModel = require("../models/OrderTicketModel")
@@ -14,6 +14,7 @@ const TicketRefundModel = require("../models/TicketRefundModel")
 const excelJS = require('exceljs');
 const fs = require('fs');
 const moment = require('moment');
+const PointHistoryModel = require("../models/PointHistoryModel")
 
 const updateUserPoints = async (user, price, type) => {
     const allOrderTicket = await OrderTicketModel.find({member: user._id, status: typePay[1]})
@@ -61,6 +62,7 @@ const addOrderTicket = async (req, res) => {
         if (member.toString() !== '' && status === typePay[1]) {
             const user = await UserModel.findById(member)
             updateUserPoints(user, price, 'ticket')
+            // await PointHistoryModel.create({point: usePoint, user: user._id, order: data._id, name: pointHis[0]})
             if (discount) {
                 await DiscountModel.findByIdAndUpdate(discount.id, { $inc: { used: 1 } }, {new: true})
             }
@@ -76,6 +78,7 @@ const addOrderTicket = async (req, res) => {
             ...(member !== '' && { member, usePoint } ),
             ...(combo.length > 0 && { combo } ),
         })
+
         // console.log(discount);
         
 

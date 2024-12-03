@@ -402,6 +402,30 @@ const showTimeFilter = async (req, res) => {
     }
 }
 
+const deleteShowTime = async (req, res) => {
+    const id = req.params.id
+    try {
+        const existing = await OrderTicketModel.findOne({ showTime: id })
+        if (existing) {
+            res.status(400).json({
+                message: 'Không thể xóa suất chiếu vì đã có khách hàng đặt suất chiếu này.'
+            })
+        } else {
+            await ShowTimeModel.findByIdAndDelete(id)
+            res.status(200).json({
+                message: 'Xóa thành công'
+            })
+        }
+    } catch (error) {
+        console.log(error);
+        
+        res.status(500).json({
+            message: "Đã có lỗi xảy ra",
+        })
+    }
+}
+
+
 module.exports = {
     addShowTime,
     allShowTime,
@@ -413,5 +437,6 @@ module.exports = {
     listFilmByTheater,
     listDateByFilm,
     showTimeFilter,
-    listShowTimeByFilm
+    listShowTimeByFilm,
+    deleteShowTime
 }

@@ -101,7 +101,8 @@ const allPerformer = async (req, res) => {
 const deletePerformer = async (req, res) => {
     const id = req.params.id
     try {
-        await FilmModel.findOneAndUpdate({ performer: { $in: [id] } }, { $pull: { performer: id } }, {new: true})
+        // await FilmModel.findOneAndUpdate({ performer: { $in: [id] } }, { $pull: { performer: id } }, {new: true})
+        await FilmModel.updateMany({ performer: { $in: [id] } }, { $pull: { performer: id } }, {new: true})
 
         await PerformerModel.findOneAndDelete({_id: id})
         res.status(200).json({

@@ -101,7 +101,9 @@ const allDirector = async (req, res) => {
 const deleteDirector = async (req, res) => {
     const id = req.params.id
     try {
-        await FilmModel.findOneAndUpdate({ director: { $in: [id] } }, { $pull: { director: id } }, {new: true})
+        await FilmModel.updateMany({ director: { $in: [id] } }, { $pull: { director: id } }, {new: true})
+
+        // await FilmModel.findOneAndUpdate({ director: { $in: [id] } }, { $pull: { director: id } }, {new: true})
         await DirectorModel.findOneAndDelete({_id: id})
         res.status(200).json({
             message: 'Xóa thành công'

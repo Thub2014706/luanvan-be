@@ -111,6 +111,11 @@ const typeStatistical = {
     3: 'Trong năm'
 }
 
+const pointHis = {
+    0: 'Dùng điểm tích lũy',
+    1: 'Hoàn đểm tích lũy',
+}
+
 module.exports = {
     typeSeatEnum,
     allAccess,
@@ -125,5 +130,6 @@ module.exports = {
     standardAge,
     signAge,
     statusTicket,
-    typeStatistical
+    typeStatistical,
+    pointHis
 };

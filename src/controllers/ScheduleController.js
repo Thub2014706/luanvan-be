@@ -1,7 +1,9 @@
 const { typeSchedule } = require("../constants")
-const FilmModel = require("../models/FilmModel")
+const FilmModel = require("../models/FilmModel");
+const OrderTicketModel = require("../models/OrderTicketModel");
 const ScheduleModel = require("../models/ScheduleModel")
 const cron = require('node-cron');
+const ShowTimeModel = require("../models/ShowTimeModel");
 
 const addSchedule = async (req, res) => {
     const { film, startDate, endDate } = req.body
@@ -236,11 +238,35 @@ const listScheduleNotEd = async (req, res) => {
     }
 }
 
+const deleteSchedule = async (req, res) => {
+    const id = req.params.id
+    try {
+        const existing = await ShowTimeModel.findOne({ schedule: id })
+        if (existing) {
+            res.status(400).json({
+                message: 'Không thể xóa lịch chiếu vì ràng buộc khóa ngoại với các dữ liệu liên quan.'
+            })
+        } else {
+            await ScheduleModel.findByIdAndUpdate(id, {isDelete: true})
+            res.status(200).json({
+                message: 'Xóa thành công'
+            })
+        }
+    } catch (error) {
+        console.log(error);
+        
+        res.status(500).json({
+            message: "Đã có lỗi xảy ra",
+        })
+    }
+}
+
 module.exports = {
     addSchedule,
     updateSchedule,
     allSchedule,
     detailSchedule,
     listSchedule,
-    listScheduleNotEd
+    listScheduleNotEd,
+    deleteSchedule
 }

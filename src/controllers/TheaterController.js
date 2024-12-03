@@ -1,6 +1,8 @@
 const RoomModel = require("../models/RoomModel")
 const SeatModel = require("../models/SeatModel")
 const TheaterModel = require("../models/TheaterModel")
+const OrderComboModel = require("../models/OrderComboModel")
+const ShowTimeModel = require("../models/ShowTimeModel")
 
 const addTheater = async (req, res) => {
     const { name, address, province, district, ward } = req.body
@@ -62,15 +64,24 @@ const updateTheater = async (req, res) => {
 const deleteTheater = async (req, res) => {
     const id = req.params.id
     try {
-        const existing = await RoomModel.find({theater: id})
-        await RoomModel.findOneAndUpdate({theater: id}, {isDelete: true})
-        await Promise.all(existing.map(async item => 
-            await SeatModel.findOneAndUpdate({room: item._id}, {isDelete: true}))
-        )
-        await TheaterModel.findByIdAndUpdate(id, {isDelete: true}, {new: true})
-        res.status(200).json({
-            message: 'Xóa thành công'
-        })
+        const existingCombo = await OrderComboModel.findOne({theater: id})
+        const existingTicket = await ShowTimeModel.findOne({theater: id})
+        if (existingCombo || existingTicket) {
+            res.status(400).json({
+                message: 'Không thể xóa rạp vì ràng buộc khóa ngoại với các dữ liệu liên quan.'
+            })
+        } else {
+            const existing = await RoomModel.find({theater: id})
+            await RoomModel.findOneAndUpdate({theater: id}, {isDelete: true})
+            await Promise.all(existing.map(async item => 
+                await SeatModel.findOneAndUpdate({room: item._id}, {isDelete: true}))
+            )
+            await TheaterModel.findByIdAndUpdate(id, {isDelete: true}, {new: true})
+            res.status(200).json({
+                message: 'Xóa thành công'
+            })
+        }
+
     } catch (error) {
         console.log(error)
         res.status(500).json({

@@ -67,6 +67,8 @@ const deleteGenre = async (req, res) => {
             message: 'Xóa thành công'
         })
     } catch (error) {
+        console.log(error);
+        
         res.status(500).json({
             message: "Đã có lỗi xảy ra",
         })

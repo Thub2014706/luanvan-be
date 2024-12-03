@@ -1,6 +1,7 @@
 const { typeSeatEnum } = require("../constants")
 const RoomModel = require("../models/RoomModel")
 const SeatModel = require("../models/SeatModel")
+const ShowTimeModel = require("../models/ShowTimeModel")
 
 const addRoom = async (req, res) => {
     const { name, numCol, numRow, type, theater } = req.body
@@ -87,11 +88,19 @@ const updateRoom = async (req, res) => {
 const deleteRoom = async (req, res) => {
     const id = req.params.id
     try {
-        await RoomModel.findByIdAndUpdate(id, {isDelete: true})
-        res.status(200).json({
-            message: 'Xóa thành công'
-        })
+        const existingTicket = await ShowTimeModel.findOne({room: id})
+        if (existingTicket) {
+            res.status(400).json({
+                message: 'Không thể xóa phòng vì ràng buộc khóa ngoại với các dữ liệu liên quan.'
+            })
+        } else {
+            await RoomModel.findByIdAndUpdate(id, {isDelete: true})
+            res.status(200).json({
+                message: 'Xóa thành công'
+            })
+        }
     } catch (error) {
+        console.log(error);
         res.status(500).json({
             message: "Đã có lỗi xảy ra",
         })
