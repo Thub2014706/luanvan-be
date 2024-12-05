@@ -138,6 +138,8 @@ const allTicketRefund = async (req, res) => {
 
 const ticketRefundByOrder = async (req, res) => {
     const { id } = req.params
+    console.log(id);
+    
 
     try {        
         const data = await TicketRefundModel.findOne({order: id})

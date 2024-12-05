@@ -108,8 +108,17 @@ const allOrderTicketSelled = async (req, res) => {
     const {showTime} = req.query
     try {
         const data = await OrderTicketModel.find({showTime, status: typePay[1]})
+        const dataFinal = await Promise.all(data.map(async item => {
+            const test = await TicketRefundModel.findOne({order: item._id})
+            if (!test) {
+                return item
+            } else return null
+        }))
+        // console.log(dataFinal);
+        const filteredDataFinal = dataFinal.filter((item) => item !== null);
+        
         const array = []
-        data.map(item => item.seat.map(mini => array.push(mini)))
+        filteredDataFinal.map(item => item.seat.map(mini => array.push(mini)))
         // console.log(array)
         res.status(200).json(array)
     } catch (error) {

@@ -19,7 +19,7 @@ const addFilm = async (req, res) => {
             message: "Yêu cầu nhập đầy đủ thông tin"
         })
     }
-    if (endDate < releaseDate) {
+    if (new Date(endDate) < new Date(releaseDate)) {
         return res.status(400).json({
             message: "Ngày kết thúc không thể sớm hơn ngày phát hành"
         })
@@ -60,6 +60,11 @@ const updateFilm = async (req, res) => {
     if (!name || !time || !nation || !genre || !director || !releaseDate || !endDate || !age || !performer || !image || !trailer || !description) {
         return res.status(400).json({
             message: "Yêu cầu nhập đầy đủ thông tin"
+        })
+    }
+    if (new Date(endDate) < new Date(releaseDate)) {
+        return res.status(400).json({
+            message: "Ngày kết thúc không thể sớm hơn ngày phát hành"
         })
     }
     try {

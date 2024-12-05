@@ -14,7 +14,7 @@ const addSchedule = async (req, res) => {
         })
     }
 
-    if (endDate < startDate) {
+    if (new Date(endDate) < new Date(startDate)) {
         return res.status(400).json({
             message: "Ngày kết thúc không thể sớm hơn ngày bắt đầu"
         })
@@ -144,6 +144,7 @@ const listSchedule = async (req, res) => {
             type: {$ne: typeSchedule[0]},
             startDate: { $lte: new Date(date) },
             endDate: { $gte: new Date(date) },
+            isDelete: false
         })
         const data = (await Promise.all(schedules.map(async item => {
             const film = await FilmModel.findOne({_id: item.film, status: true})
@@ -186,7 +187,7 @@ const listSchedule = async (req, res) => {
 //     }
 // }
 
-cron.schedule(`0 0 * * * *`, async () => {
+cron.schedule(`0 * * * * *`, async () => {
     try {
         const data1 = await ScheduleModel.find({type: typeSchedule[2]})
         await Promise.all(data1.map(async item => {
