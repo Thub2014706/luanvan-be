@@ -10,5 +10,6 @@ router.get('/detail/:id', performerController.detailPerformer);
 router.get('/', performerController.allPerformer);
 router.delete('/:id', middlewares.performerAccuracy, performerController.deletePerformer);
 router.get('/list', performerController.listPerfomer);
+router.patch('/status/:id', middlewares.performerAccuracy, performerController.statusPerformer);
 
 module.exports = router

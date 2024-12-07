@@ -1,8 +1,9 @@
-const { typePay } = require("../constants")
+const { typePay, pointHis } = require("../constants")
 const ComboModel = require("../models/ComboModel")
 const DiscountModel = require("../models/DiscountModel")
 const FoodModel = require("../models/FoodModel")
 const OrderComboModel = require("../models/OrderComboModel")
+const PointHistoryModel = require("../models/PointHistoryModel")
 const TheaterModel = require("../models/TheaterModel")
 const UserModel = require("../models/UserModel")
 const { updateUserPoints } = require("./OrderTicketController")
@@ -22,13 +23,7 @@ const addOrderCombo = async (req, res) => {
         } else {
             status = typePay[1]
         }
-        if (member.toString() !== '' && status === typePay[1]) {
-            const user = await UserModel.findById(member)
-            updateUserPoints(user, price, 'combo')
-            if (discount) {
-                await DiscountModel.findByIdAndUpdate(discount.id, { $inc: { used: 1 } }, {new: true})
-            }
-        }
+
         const data = await OrderComboModel.create({
             idOrder: order, 
             staff, 
@@ -39,6 +34,16 @@ const addOrderCombo = async (req, res) => {
             ...(combo.length > 0 && { combo } ),
             theater
         })
+        
+        if (member.toString() !== '' && status === typePay[1]) {
+            const user = await UserModel.findById(member)
+            updateUserPoints(user, price, 'combo')
+            usePoint > 0 && await PointHistoryModel.create({point: usePoint, user: member, order: data._id, orderModel: 'OrderCombo', name: pointHis[0]})
+            if (discount) {
+                await DiscountModel.findByIdAndUpdate(discount.id, { $inc: { used: 1 } }, {new: true})
+            }
+        }
+        
         
         res.status(200).json(data)
     } catch (error) {

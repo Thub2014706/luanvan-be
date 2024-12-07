@@ -60,12 +60,21 @@ const updateGenre = async (req, res) => {
 const deleteGenre = async (req, res) => {
     const id = req.params.id
     try {
-        await FilmModel.updateMany({ genre: { $in: [id] } }, { $pull: { genre: id } }, {new: true})
+        // await FilmModel.updateMany({ genre: { $in: [id] } }, { $pull: { genre: id } }, {new: true})
 
-        await GenreModel.findOneAndDelete({_id: id})
-        res.status(200).json({
-            message: 'Xóa thành công'
-        })
+        // await GenreModel.findOneAndDelete({_id: id})
+
+        const existing = await FilmModel.findOne({ genre: { $in: [id] } })
+        if (existing) {
+            res.status(400).json({
+                message: 'Không thể xóa thể loại vì ràng buộc khóa ngoại với các dữ liệu liên quan.'
+            })
+        } else {
+            await GenreModel.findOneAndDelete({_id: id})
+            res.status(200).json({
+                message: 'Xóa thành công'
+            })
+        }
     } catch (error) {
         console.log(error);
         
@@ -117,7 +126,21 @@ const allGenre = async (req, res) => {
 
 const listGenre = async (req, res) => {
     try {
-        const data = await GenreModel.find().sort({createdAt: -1});
+        const data = await GenreModel.find({status: true}).sort({createdAt: -1});
+        res.status(200).json(data)
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({
+            message: "Đã có lỗi xảy ra",
+        })
+    }
+}
+
+const statusGenre = async (req, res) => {
+    const id = req.params.id
+    try {
+        const existing = await GenreModel.findById(id);
+        const data = await GenreModel.findByIdAndUpdate(id, {status: !existing.status}, { new: true })
         res.status(200).json(data)
     } catch (error) {
         console.log(error)
@@ -133,5 +156,6 @@ module.exports = {
     deleteGenre,
     detailGenre,
     allGenre,
-    listGenre
+    listGenre,
+    statusGenre
 }

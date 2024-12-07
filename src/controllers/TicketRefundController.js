@@ -1,4 +1,4 @@
-const { statusTicket } = require("../constants")
+const { statusTicket, pointHis } = require("../constants")
 const OrderTicketModel = require("../models/OrderTicketModel")
 const PrintTicketModel = require("../models/PrintTicketModel")
 const ShowTimeModel = require("../models/ShowTimeModel")
@@ -12,6 +12,7 @@ const SeatModel = require("../models/SeatModel")
 const RoomModel = require("../models/RoomModel")
 const excelJS = require('exceljs');
 const moment = require('moment');
+const PointHistoryModel = require("../models/PointHistoryModel")
 
 const addTicketRefund = async (req, res) => {
     const { order, user } = req.body
@@ -77,7 +78,13 @@ const addTicketRefund = async (req, res) => {
     try {
         const data = await TicketRefundModel.create(req.body)
         if (data) {
-            
+            await PointHistoryModel.create({
+                point: orderDetail.price + orderDetail.usePoint, 
+                user, 
+                order, 
+                orderModel: 'OrderTicket', 
+                name: pointHis[1]
+            })
             await UserModel.findByIdAndUpdate(user, {point: userDetail.point + orderDetail.price + orderDetail.usePoint})
         }
         res.status(200).json(data)
@@ -94,7 +101,7 @@ const allTicketRefund = async (req, res) => {
     const {number} = req.query
 
     try {        
-        const listRefund = await TicketRefundModel.find({user: id})
+        const listRefund = await TicketRefundModel.find({user: id}).sort({createdAt: -1})
         const allOrderTicket = await Promise.all(listRefund.map(async item => {
             return await OrderTicketModel.findById(item.order)
         }));

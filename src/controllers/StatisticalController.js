@@ -127,7 +127,7 @@ const sDayRevenueTicket = async (req, res) => {
                     
                 const total = data.reduce((sum, item) => {
                     const discount = item.discount && item.discount.useDiscount > 0 ? item.discount.useDiscount : 0
-                    const point = item.usePoint ? usePoint : 0
+                    const point = item.usePoint ? item.usePoint : 0
                     const original = item.price + point + discount
                     const comboPrice = item.combo.length > 0
                         ? item.combo.reduce((comboSum, com) => comboSum + com.price * com.quantity, 0)
@@ -154,7 +154,7 @@ const sDayRevenueTicket = async (req, res) => {
                      
                     const total = data.reduce((sum, item) => {
                         const discount = item.discount && item.discount.useDiscount > 0 ? item.discount.useDiscount : 0
-                        const point = item.usePoint ? usePoint : 0
+                        const point = item.usePoint ? item.usePoint : 0
                         const original = item.price + point + discount
                         const comboPrice = item.combo.length > 0
                             ? item.combo.reduce((comboSum, com) => comboSum + com.price * com.quantity, 0)
@@ -186,7 +186,7 @@ const sDayRevenueTicket = async (req, res) => {
                         
                     const total = data.reduce((sum, item) => {
                         const discount = item.discount && item.discount.useDiscount > 0 ? item.discount.useDiscount : 0
-                        const point = item.usePoint ? usePoint : 0
+                        const point = item.usePoint ? item.usePoint : 0
                         const original = item.price + point + discount
                         const comboPrice = item.combo.length > 0
                             ? item.combo.reduce((comboSum, com) => comboSum + com.price * com.quantity, 0)
@@ -246,7 +246,7 @@ const sDayRevenueCombo = async (req, res) => {
 
                 const total2 = data2.reduce((sum, item) => {
                     const discount = item.discount && item.discount.useDiscount > 0 ? item.discount.useDiscount : 0
-                    const point = item.usePoint ? usePoint : 0
+                    const point = item.usePoint ? item.usePoint : 0
                     const original = item.price + point + discount
                     const comboPrice = item.combo.length > 0
                         ? item.combo.reduce((comboSum, com) => comboSum + com.price * com.quantity, 0)
@@ -281,7 +281,7 @@ const sDayRevenueCombo = async (req, res) => {
     
                     const total2 = data2.reduce((sum, item) => {
                         const discount = item.discount && item.discount.useDiscount > 0 ? item.discount.useDiscount : 0
-                        const point = item.usePoint ? usePoint : 0
+                        const point = item.usePoint ? item.usePoint : 0
                         const original = item.price + point + discount
                         const comboPrice = item.combo.length > 0
                             ? item.combo.reduce((comboSum, com) => comboSum + com.price * com.quantity, 0)
@@ -320,7 +320,7 @@ const sDayRevenueCombo = async (req, res) => {
     
                     const total2 = data2.reduce((sum, item) => {
                         const discount = item.discount && item.discount.useDiscount > 0 ? item.discount.useDiscount : 0
-                        const point = item.usePoint ? usePoint : 0
+                        const point = item.usePoint ? item.usePoint : 0
                         const original = item.price + point + discount
                         const comboPrice = item.combo.length > 0
                             ? item.combo.reduce((comboSum, com) => comboSum + com.price * com.quantity, 0)
@@ -529,7 +529,7 @@ const filmRevenue = async (req, res) => {
 
             const total = filter.reduce((sum, item) => {
                 const discount = item.discount && item.discount.useDiscount > 0 ? item.discount.useDiscount : 0
-                const point = item.usePoint ? usePoint : 0
+                const point = item.usePoint ? item.usePoint : 0
                 const original = item.price + point + discount
                 const comboPrice = item.combo.length > 0
                     ? item.combo.reduce((comboSum, com) => comboSum + com.price * com.quantity, 0)
@@ -581,7 +581,7 @@ const theaterRevenue = async (req, res) => {
 
             const total = filter.reduce((sum, item) => {
                 const discount = item.discount && item.discount.useDiscount > 0 ? item.discount.useDiscount : 0
-                const point = item.usePoint ? usePoint : 0
+                const point = item.usePoint ? item.usePoint : 0
                 const original = item.price + point + discount
                 const comboPrice = item.combo.length > 0
                     ? item.combo.reduce((comboSum, com) => comboSum + com.price * com.quantity, 0)
@@ -633,7 +633,7 @@ const theaterComboRevenue = async (req, res) => {
 
             const total1 = filter.reduce((sum, item) => {
                 const discount = item.discount && item.discount.useDiscount > 0 ? item.discount.useDiscount : 0
-                const point = item.usePoint ? usePoint : 0
+                const point = item.usePoint ? item.usePoint : 0
                 const original = item.price + point + discount
                 const comboPrice = item.combo.length > 0
                     ? item.combo.reduce((comboSum, com) => comboSum + com.price * com.quantity, 0)

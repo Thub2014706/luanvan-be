@@ -59,14 +59,7 @@ const addOrderTicket = async (req, res) => {
         } else {
             status = typePay[1]
         }
-        if (member.toString() !== '' && status === typePay[1]) {
-            const user = await UserModel.findById(member)
-            updateUserPoints(user, price, 'ticket')
-            // await PointHistoryModel.create({point: usePoint, user: user._id, order: data._id, name: pointHis[0]})
-            if (discount) {
-                await DiscountModel.findByIdAndUpdate(discount.id, { $inc: { used: 1 } }, {new: true})
-            }
-        }
+        
         const data = await OrderTicketModel.create({
             showTime, 
             idOrder: order, 
@@ -78,13 +71,20 @@ const addOrderTicket = async (req, res) => {
             ...(member !== '' && { member, usePoint } ),
             ...(combo.length > 0 && { combo } ),
         })
-
+        if (member.toString() !== '' && status === typePay[1]) {
+            const user = await UserModel.findById(member)
+            updateUserPoints(user, price, 'ticket')
+            usePoint > 0 && await PointHistoryModel.create({point: usePoint, user: member, order: data._id, orderModel: 'OrderTicket', name: pointHis[0]})
+            if (discount) {
+                await DiscountModel.findByIdAndUpdate(discount.id, { $inc: { used: 1 } }, {new: true})
+            }
+        }
         // console.log(discount);
         
 
         res.status(200).json(data)
     } catch (error) {
-        console.log('ee', req.body)
+        console.log('ee', error)
         res.status(500).json({
             message: "Đã có lỗi xảy ra",
         })

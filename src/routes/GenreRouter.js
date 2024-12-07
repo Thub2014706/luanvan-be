@@ -9,5 +9,6 @@ router.delete('/:id', middlewares.genreAccuracy, genreController.deleteGenre);
 router.get('/detail/:id', genreController.detailGenre);
 router.get('/', genreController.allGenre);
 router.get('/list', genreController.listGenre)
+router.patch('/status/:id', middlewares.genreAccuracy, genreController.statusGenre);
 
 module.exports = router

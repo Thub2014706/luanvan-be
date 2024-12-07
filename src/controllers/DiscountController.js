@@ -1,4 +1,6 @@
 const DiscountModel = require("../models/DiscountModel")
+const OrderComboModel = require("../models/OrderComboModel")
+const OrderTicketModel = require("../models/OrderTicketModel")
 
 const addDiscount = async (req, res) => {
     const { name, code, percent, quantity, minium, level, startDate, endDate } = req.body
@@ -139,27 +141,39 @@ const detailDiscount = async (req, res) => {
     }
 }
 
-// const statusDiscount = async (req, res) => {
-//     const id = req.params.id
-//     try {
-//         const existing = await DiscountModel.findById(id);
-//         const data = await DiscountModel.findByIdAndUpdate(id, {status: !existing.status}, { new: true })
-//         res.status(200).json(data)
-//     } catch (error) {
-//         console.log(error)
-//         res.status(500).json({
-//             message: "Đã có lỗi xảy ra",
-//         })
-//     }
-// }
+const statusDiscount = async (req, res) => {
+    const id = req.params.id
+    try {
+        const existing = await DiscountModel.findById(id);
+        const data = await DiscountModel.findByIdAndUpdate(id, {status: !existing.status}, { new: true })
+        res.status(200).json(data)
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({
+            message: "Đã có lỗi xảy ra",
+        })
+    }
+}
 
 const deleteDiscount = async (req, res) => {
     const id = req.params.id
     try {
-        const data = await DiscountModel.findByIdAndUpdate(id, {isDelete: true})
-        res.status(200).json({
-            message: 'Xóa thành công'
-        })
+        // const data = await DiscountModel.findByIdAndUpdate(id, {isDelete: true})
+        // res.status(200).json({
+        //     message: 'Xóa thành công'
+        // })
+        const existingOrderCombo = await OrderComboModel.findOne({"discount.id": id})
+        const existingOrderTicket = await OrderTicketModel.findOne({"discount.id": id })
+        if (existingOrderCombo || existingOrderTicket) {
+            res.status(400).json({
+                message: 'Không thể xóa khuyến mãi vì ràng buộc khóa ngoại với các dữ liệu liên quan.'
+            })
+        } else {
+            await DiscountModel.findByIdAndUpdate(id, {isDelete: true})
+            res.status(200).json({
+                message: 'Xóa thành công'
+            })
+        }
     } catch (error) {
         res.status(500).json({
             message: "Đã có lỗi xảy ra",
@@ -170,7 +184,7 @@ const deleteDiscount = async (req, res) => {
 const listDiscount = async (req, res) => {
     try {
         const now = new Date().setUTCHours(0, 0, 0, 0)
-        const data = await DiscountModel.find({isDelete: false, startDate: {$lte: now}, endDate: {$gte: now}})
+        const data = await DiscountModel.find({isDelete: false, status: true, startDate: {$lte: now}, endDate: {$gte: now}})
         // const data = await DiscountModel.find({status: true, startDate: {$lte: now}, endDate: {$gte: now}})
         const bigData = data.map(item => {
             return item.quantity - item.used > 0 ? item : null
@@ -189,7 +203,7 @@ const listDiscount = async (req, res) => {
 const listDiscountFuture = async (req, res) => {
     try {
         const now = new Date().setUTCHours(0, 0, 0, 0)
-        const data = await DiscountModel.find({isDelete: false, endDate: {$gte: now}})
+        const data = await DiscountModel.find({isDelete: false, status: true, endDate: {$gte: now}})
         // const data = await DiscountModel.find({status: true, startDate: {$lte: now}, endDate: {$gte: now}})
         const bigData = data.map(item => {
             return item.quantity - item.used > 0 ? item : null
@@ -211,7 +225,7 @@ module.exports = {
     allDiscount,
     updateDiscount,
     detailDiscount,
-    // statusDiscount,
+    statusDiscount,
     deleteDiscount,
     listDiscount,
     listDiscountFuture

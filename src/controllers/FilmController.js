@@ -43,7 +43,7 @@ const getImage = (req, res) => {
         const image = fs.readFileSync(imgPath)
         const encode = image.toString('base64');
         res.writeHead(200, { 'Content-Type': 'image/jpeg' }); // thiet lap phan hoi voi mine la image/jpeg
-        res.end(Buffer.from(encode, 'base64')) // ket thuc phan hoi va gui image duoi dang nhi phan
+        res.end(Buffer.from(encode, 'base64')) // ket thuc phan hoi va gui image duoi dang nhi phann
     } catch (err) {
         console.log(err)
         res.status(500).json({

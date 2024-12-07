@@ -101,13 +101,17 @@ const allDirector = async (req, res) => {
 const deleteDirector = async (req, res) => {
     const id = req.params.id
     try {
-        await FilmModel.updateMany({ director: { $in: [id] } }, { $pull: { director: id } }, {new: true})
-
-        // await FilmModel.findOneAndUpdate({ director: { $in: [id] } }, { $pull: { director: id } }, {new: true})
-        await DirectorModel.findOneAndDelete({_id: id})
-        res.status(200).json({
-            message: 'Xóa thành công'
-        })
+        const existing = await FilmModel.findOne({ director: { $in: [id] } })
+        if (existing) {
+            res.status(400).json({
+                message: 'Không thể xóa đạo diễn vì ràng buộc khóa ngoại với các dữ liệu liên quan.'
+            })
+        } else {
+            await DirectorModel.findOneAndDelete({_id: id})
+            res.status(200).json({
+                message: 'Xóa thành công'
+            })
+        }
     } catch (error) {
         res.status(500).json({
             message: "Đã có lỗi xảy ra",
@@ -117,9 +121,23 @@ const deleteDirector = async (req, res) => {
 
 const listDirector = async (req, res) => {
     try {
-        const data = await DirectorModel.find({}).sort({createdAt: -1})
+        const data = await DirectorModel.find({status: true}).sort({createdAt: -1})
         res.status(200).json(data)
     } catch (error) {
+        res.status(500).json({
+            message: "Đã có lỗi xảy ra",
+        })
+    }
+}
+
+const statusDirector = async (req, res) => {
+    const id = req.params.id
+    try {
+        const existing = await DirectorModel.findById(id);
+        const data = await DirectorModel.findByIdAndUpdate(id, {status: !existing.status}, { new: true })
+        res.status(200).json(data)
+    } catch (error) {
+        console.log(error)
         res.status(500).json({
             message: "Đã có lỗi xảy ra",
         })
@@ -132,5 +150,6 @@ module.exports = {
     detailDirector,
     allDirector,
     deleteDirector,
-    listDirector
+    listDirector,
+    statusDirector
 }

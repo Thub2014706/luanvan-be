@@ -4,7 +4,7 @@ const { default: axios } = require('axios');
 const crypto = require('crypto');
 const { addOrderTicket, updateUserPoints } = require('./OrderTicketController');
 const OrderTicketModel = require('../models/OrderTicketModel');
-const { typePay, standardAge, signAge } = require('../constants');
+const { typePay, standardAge, signAge, pointHis } = require('../constants');
 const OrderComboModel = require('../models/OrderComboModel');
 const UserModel = require('../models/UserModel');
 const { transporter } = require('./EmailController');
@@ -22,6 +22,7 @@ const path = require('path');
 const fs = require('fs');
 const FoodModel = require('../models/FoodModel');
 const DiscountModel = require('../models/DiscountModel');
+const PointHistoryModel = require('../models/PointHistoryModel');
 
 const momoPost = async (req, res, urlRedirectUrl, urlIpnUrl) => {
     //https://developers.momo.vn/#/docs/en/aiov2/?id=payment-method
@@ -29,7 +30,7 @@ const momoPost = async (req, res, urlRedirectUrl, urlIpnUrl) => {
     var orderInfo = 'Thanh toán với MoMo';
     var partnerCode = 'MOMO';
     var redirectUrl = `${urlRedirectUrl}`;
-    var ipnUrl = `https://046b-113-180-6-251.ngrok-free.app/api/momo/${urlIpnUrl}`;
+    var ipnUrl = `https://3bd3-113-161-210-164.ngrok-free.app/api/momo/${urlIpnUrl}`;
     var requestType = "payWithMethod";
     var amount = req.body.amount;
     var orderId = 'CINE' + new Date().getTime();
@@ -245,6 +246,14 @@ const callback = async (req, res, model, type) => {
             const detailOrder = await model.findOne({idOrder: orderId})
             // console.log(model, detailOrder);
             
+            detailOrder.usePoint > 0 && await PointHistoryModel.create({
+                point: detailOrder.usePoint, 
+                user: detailOrder.member, 
+                order: detailOrder._id, 
+                orderModel: type === 'combo' ? 'OrderCombo' : 'OrderTicket', 
+                name: pointHis[0]
+            })
+
 
             if (detailOrder.member && detailOrder.member !== '') {
                 const user = await UserModel.findById(detailOrder.member)

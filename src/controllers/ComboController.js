@@ -1,6 +1,8 @@
 const { isEmpty } = require("validator")
 const ComboModel = require("../models/ComboModel")
 const FoodModel = require("../models/FoodModel")
+const OrderComboModel = require("../models/OrderComboModel")
+const OrderTicketModel = require("../models/OrderTicketModel")
 
 const addCombo = async (req, res) => {
     const { name, price, variants } = req.body
@@ -109,28 +111,38 @@ const detailCombo = async (req, res) => {
     }
 }
 
-// const statusCombo = async (req, res) => {
-//     const id = req.params.id
-//     try {
-//         const existing = await ComboModel.findById(id);
-//         const data = await ComboModel.findByIdAndUpdate(id, {status: !existing.status}, { new: true })
-//         res.status(200).json(data)
-//     } catch (error) {
-//         console.log(error)
-//         res.status(500).json({
-//             message: "Đã có lỗi xảy ra",
-//         })
-//     }
-// }
+const statusCombo = async (req, res) => {
+    const id = req.params.id
+    try {
+        const existing = await ComboModel.findById(id);
+        const data = await ComboModel.findByIdAndUpdate(id, {status: !existing.status}, { new: true })
+        res.status(200).json(data)
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({
+            message: "Đã có lỗi xảy ra",
+        })
+    }
+}
 
 const deleteCombo = async (req, res) => {
     const id = req.params.id
     try {
-        await ComboModel.findByIdAndUpdate(id, {isDelete: true})
-        res.status(200).json({
-            message: 'Xóa thành công'
-        })
+        const existingOrderCombo = await OrderComboModel.findOne({combo: { $elemMatch: { id } }})
+        const existingOrderTicket = await OrderTicketModel.findOne({combo: { $elemMatch: { id } }})
+        if (existingOrderCombo || existingOrderTicket) {
+            res.status(400).json({
+                message: 'Không thể xóa combo vì ràng buộc khóa ngoại với các dữ liệu liên quan.'
+            })
+        } else {
+            await ComboModel.findByIdAndUpdate(id, {isDelete: true})
+            res.status(200).json({
+                message: 'Xóa thành công'
+            })
+        }
     } catch (error) {
+        console.log(error);
+        
         res.status(500).json({
             message: "Đã có lỗi xảy ra",
         })
@@ -140,7 +152,7 @@ const deleteCombo = async (req, res) => {
 const listCombo = async (req, res) => {
     try {
         // const data = await ComboModel.find({status: true}).sort({createdAt: -1})
-        const data = await ComboModel.find({isDelete: false}).sort({createdAt: -1})
+        const data = await ComboModel.find({isDelete: false, status: true}).sort({createdAt: -1})
         res.status(200).json(data)
     } catch (error) {
         res.status(500).json({
@@ -155,7 +167,7 @@ module.exports = {
     allCombo,
     updateCombo,
     detailCombo,
-    // statusCombo,
+    statusCombo,
     deleteCombo,
     listCombo
 }

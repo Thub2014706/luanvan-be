@@ -10,5 +10,6 @@ router.get('/detail/:id', directorController.detailDirector);
 router.get('/', directorController.allDirector);
 router.delete('/:id', middlewares.directorAccuracy, directorController.deleteDirector);
 router.get('/list', directorController.listDirector);
+router.patch('/status/:id', middlewares.directorAccuracy, directorController.statusDirector);
 
 module.exports = router

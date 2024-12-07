@@ -1,4 +1,7 @@
 const FoodModel = require("../models/FoodModel")
+const ComboModel = require("../models/ComboModel")
+const OrderComboModel = require("../models/OrderComboModel")
+const OrderTicketModel = require("../models/OrderTicketModel")
 
 const addFood = async (req, res) => {
     const { name, price } = req.body
@@ -96,27 +99,40 @@ const detailFood = async (req, res) => {
     }
 }
 
-// const statusFood = async (req, res) => {
-//     const id = req.params.id
-//     try {
-//         const existing = await FoodModel.findById(id);
-//         const data = await FoodModel.findByIdAndUpdate(id, {status: !existing.status}, { new: true })
-//         res.status(200).json(data)
-//     } catch (error) {
-//         console.log(error)
-//         res.status(500).json({
-//             message: "Đã có lỗi xảy ra",
-//         })
-//     }
-// }
+const statusFood = async (req, res) => {
+    const id = req.params.id
+    try {
+        const existing = await FoodModel.findById(id);
+        const data = await FoodModel.findByIdAndUpdate(id, {status: !existing.status}, { new: true })
+        res.status(200).json(data)
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({
+            message: "Đã có lỗi xảy ra",
+        })
+    }
+}
 
 const deleteFood = async (req, res) => {
     const id = req.params.id
     try {
-        const data = await FoodModel.findByIdAndUpdate(id, {isDelete: true})
-        res.status(200).json({
-            message: 'Xóa thành công'
-        })
+        // const data = await FoodModel.findByIdAndUpdate(id, {isDelete: true})
+        // res.status(200).json({
+        //     message: 'Xóa thành công'
+        // })
+        const existingCombo = await ComboModel.findOne({ "variants.food": id })
+        const existingOrderCombo = await OrderComboModel.findOne({combo: { $elemMatch: { id } }})
+        const existingOrderTicket = await OrderTicketModel.findOne({combo: { $elemMatch: { id } }})
+        if (existingCombo || existingOrderCombo || existingOrderTicket) {
+            res.status(400).json({
+                message: 'Không thể xóa thức ăn vì ràng buộc khóa ngoại với các dữ liệu liên quan.'
+            })
+        } else {
+            await FoodModel.findByIdAndUpdate(id, {isDelete: true})
+            res.status(200).json({
+                message: 'Xóa thành công'
+            })
+        }
     } catch (error) {
         res.status(500).json({
             message: "Đã có lỗi xảy ra",
@@ -127,7 +143,7 @@ const deleteFood = async (req, res) => {
 const listFood = async (req, res) => {
     try {
         // const data = await FoodModel.find({status: true})
-        const data = await FoodModel.find({isDelete: false})
+        const data = await FoodModel.find({isDelete: false, status: true})
         res.status(200).json(data)
     } catch (error) {
         res.status(500).json({
@@ -142,7 +158,7 @@ module.exports = {
     allFood,
     updateFood,
     detailFood,
-    // statusFood,
+    statusFood,
     deleteFood,
     listFood
 }

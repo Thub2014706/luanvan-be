@@ -101,13 +101,17 @@ const allPerformer = async (req, res) => {
 const deletePerformer = async (req, res) => {
     const id = req.params.id
     try {
-        // await FilmModel.findOneAndUpdate({ performer: { $in: [id] } }, { $pull: { performer: id } }, {new: true})
-        await FilmModel.updateMany({ performer: { $in: [id] } }, { $pull: { performer: id } }, {new: true})
-
-        await PerformerModel.findOneAndDelete({_id: id})
-        res.status(200).json({
-            message: 'Xóa thành công'
-        })
+        const existing = await FilmModel.findOne({ performer: { $in: [id] } })
+        if (existing) {
+            res.status(400).json({
+                message: 'Không thể xóa diễn viên vì ràng buộc khóa ngoại với các dữ liệu liên quan.'
+            })
+        } else {
+            await PerformerModel.findOneAndDelete({_id: id})
+            res.status(200).json({
+                message: 'Xóa thành công'
+            })
+        }
     } catch (error) {
         res.status(500).json({
             message: "Đã có lỗi xảy ra",
@@ -117,9 +121,23 @@ const deletePerformer = async (req, res) => {
 
 const listPerfomer = async (req, res) => {
     try {
-        const data = await PerformerModel.find({}).sort({createdAt: -1})
+        const data = await PerformerModel.find({status: true}).sort({createdAt: -1})
         res.status(200).json(data)
     } catch (error) {
+        res.status(500).json({
+            message: "Đã có lỗi xảy ra",
+        })
+    }
+}
+
+const statusPerformer = async (req, res) => {
+    const id = req.params.id
+    try {
+        const existing = await PerformerModel.findById(id);
+        const data = await PerformerModel.findByIdAndUpdate(id, {status: !existing.status}, { new: true })
+        res.status(200).json(data)
+    } catch (error) {
+        console.log(error)
         res.status(500).json({
             message: "Đã có lỗi xảy ra",
         })
@@ -132,5 +150,6 @@ module.exports = {
     detailPerformer,
     allPerformer,
     deletePerformer,
-    listPerfomer
+    listPerfomer,
+    statusPerformer
 }

@@ -9,7 +9,7 @@ const ComboSchema = new mongoose.Schema({
         quantity: { type: Number, required: true },
     }],
     isDelete: { type: Boolean, required: true, default: false },
-    // status: { type: Boolean, required: true, default: false },
+    status: { type: Boolean, required: true, default: false },
 }, {
     timestamps: true 
 });

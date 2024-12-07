@@ -112,7 +112,7 @@ const typeStatistical = {
 }
 
 const pointHis = {
-    0: 'Dùng điểm tích lũy',
+    0: 'Đã dùng điểm tích lũy để thanh toán',
     1: 'Hoàn đểm tích lũy',
 }
 

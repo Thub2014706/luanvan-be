@@ -5,7 +5,7 @@ const FoodSchema = new mongoose.Schema({
     price: { type: Number, required: true },
     image: { type: String, required: true },
     isDelete: { type: Boolean, required: true, default: false },
-    // status: { type: Boolean, required: true, default: false },
+    status: { type: Boolean, required: true, default: false },
 }, {
     timestamps: true 
 });

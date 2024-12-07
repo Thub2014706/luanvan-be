@@ -11,7 +11,7 @@ const DiscountSchema = new mongoose.Schema({
     startDate: { type: Date, required: true },
     endDate: { type: Date, required: true },
     isDelete: { type: Boolean, required: true, default: false },
-    // status: { type: Boolean, required: true, default: false },
+    status: { type: Boolean, required: true, default: false },
 }, {
     timestamps: true 
 });
