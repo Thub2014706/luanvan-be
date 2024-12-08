@@ -14,7 +14,7 @@ const { log } = require("console");
 const addFilm = async (req, res) => {
     const {name, time, nation, genre, director, releaseDate, endDate, age, performer, trailer, description} = req.body
     const image = req.file?.filename
-    if (!name || !image || !time || !nation || !genre || !director || !releaseDate || !endDate || !age || !performer || !trailer || !description) {
+    if (!name || !image || !time || !nation || !genre || !director || !releaseDate || !endDate || !age || !trailer || !description) {
         return res.status(400).json({
             message: "Yêu cầu nhập đầy đủ thông tin"
         })
@@ -57,7 +57,7 @@ const updateFilm = async (req, res) => {
     const {name, time, nation, genre, director, releaseDate, endDate, age, performer, imageId, trailer, description} = req.body
 
     const image = imageId ? imageId : req.file.filename
-    if (!name || !time || !nation || !genre || !director || !releaseDate || !endDate || !age || !performer || !image || !trailer || !description) {
+    if (!name || !time || !nation || !genre || !director || !releaseDate || !endDate || !age || !image || !trailer || !description) {
         return res.status(400).json({
             message: "Yêu cầu nhập đầy đủ thông tin"
         })

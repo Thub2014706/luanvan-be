@@ -8,7 +8,7 @@ const addTheater = async (req, res) => {
     const { name, address, province, district, ward } = req.body
     const image = req.file?.filename
 
-    const existing = await TheaterModel.findOne({ name: name, isDelete: false })
+    const existing = await TheaterModel.findOne({ name: name, isDelete: false, status: true })
     if (!name || !image || !address || !province || !district || !ward ) {
         return res.status(400).json({
             message: "Nhập đầy đủ thông tin"
@@ -38,7 +38,8 @@ const updateTheater = async (req, res) => {
     const existing = await TheaterModel.findOne({
         _id: { $ne: id },
         name: name,
-        isDelete: false
+        isDelete: false,
+        status: true
     });
     if (!name || !image || !address || !province || !district || !ward ) {
         return res.status(400).json({

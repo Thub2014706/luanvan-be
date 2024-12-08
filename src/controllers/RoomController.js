@@ -6,7 +6,7 @@ const ShowTimeModel = require("../models/ShowTimeModel")
 const addRoom = async (req, res) => {
     const { name, numCol, numRow, type, theater } = req.body
 
-    const existing = await RoomModel.findOne({ name: name, theater: theater, isDelete: false })
+    const existing = await RoomModel.findOne({ name: name, theater: theater, isDelete: false, status: true })
     if (!name || !numCol || !numRow || !type ) {
         return res.status(400).json({
             message: "Nhập đầy đủ thông tin"
@@ -46,7 +46,8 @@ const updateRoom = async (req, res) => {
     const existing = await RoomModel.findOne({
         _id: { $ne: id },
         name: name,
-        theater: theater
+        theater: theater,
+        status: true
     });
     if (!name || !numCol || !numRow || !type ) {
         return res.status(400).json({

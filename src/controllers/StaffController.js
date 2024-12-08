@@ -10,7 +10,7 @@ const createStaff = async (req, res) => {
     if (req.file) { 
         avatar = req.file.filename;
     }
-    const existingUser = await StaffModel.findOne({ $or: [{email: email}, {phone: phone}], isDelete: false })
+    const existingUser = await StaffModel.findOne({ $or: [{email: email}, {phone: phone}], isDelete: false , status: true})
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,20}$/;
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     const phoneRegex = /(09|03|07|08|05)[0-9]{8}/;

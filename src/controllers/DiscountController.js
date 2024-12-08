@@ -5,7 +5,7 @@ const OrderTicketModel = require("../models/OrderTicketModel")
 const addDiscount = async (req, res) => {
     const { name, code, percent, quantity, minium, level, startDate, endDate } = req.body
 
-    const existing = await DiscountModel.findOne({ $or: [{ name: name }, {code: code}]})
+    const existing = await DiscountModel.findOne({ $or: [{ name: name }, {code: code}], status: true})
     // console.log(req.body);
     
     if (!name || !code || !percent || !minium || level === undefined || !quantity || !startDate || !endDate) {
@@ -87,7 +87,7 @@ const updateDiscount = async (req, res) => {
     const id = req.params.id
     const { name, code, percent, quantity, minium, level, startDate, endDate } = req.body
 
-    const existing = await DiscountModel.findOne({$and: [{_id: { $ne: id }}, { $or: [{ name: name }, {code: code}]}]})
+    const existing = await DiscountModel.findOne({$and: [{_id: { $ne: id }}, { $or: [{ name: name }, {code: code}]}], status: true})
     if (!name || !code || !percent || !minium || !level || !quantity || !startDate || !endDate) {
         return res.status(400).json({
             message: "Nhập đầy đủ thông tin"

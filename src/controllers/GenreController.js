@@ -4,7 +4,8 @@ const GenreModel = require("../models/GenreModel")
 const addGenre = async (req, res) => {
     const { name } = req.body
 
-    const existing = await GenreModel.findOne({ name: name })
+    const existing = await GenreModel.findOne({ name: name, status: true })
+    // await GenreModel.collection.dropIndex('name_1');
     if (!name) {
         return res.status(400).json({
             message: "Nhập đầy đủ thông tin"

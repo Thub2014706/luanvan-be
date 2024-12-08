@@ -7,7 +7,7 @@ const addFood = async (req, res) => {
     const { name, price } = req.body
     const image = req.file?.filename
 
-    const existing = await FoodModel.findOne({ name: name })
+    const existing = await FoodModel.findOne({ name: name, status: true })
     if (!name || !price || !image) {
         return res.status(400).json({
             message: "Nhập đầy đủ thông tin"

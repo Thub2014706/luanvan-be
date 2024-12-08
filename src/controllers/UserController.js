@@ -4,14 +4,14 @@ const QRCode = require('qrcode')
 
 const register = async (req, res) => {
     const { username, email, phone, password, confirmPassword } = req.body
-    const existingUser = await UserModel.findOne({ email: email })
+    const existingUser = await UserModel.findOne({ $or: [{email: email}, {phone: phone}], status: true })
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,20}$/;
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     const phoneRegex = /(09|03|07|08|05)[0-9]{8}/;
     
     if (existingUser) {
         return res.status(400).json({
-            message: "Email đã tồn tại"
+            message: "Tài khoản đã tồn tại"
         })
     }
 

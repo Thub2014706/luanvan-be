@@ -8,7 +8,7 @@ const addCombo = async (req, res) => {
     const { name, price, variants } = req.body
     const image = req.file?.filename
 
-    const existing = await ComboModel.findOne({ name: name })
+    const existing = await ComboModel.findOne({ name: name, status: true })
     const variantsParse = JSON.parse(variants)
     if (!name || !price || !image || variantsParse.length === 0 || variantsParse.some(item => item.food === '') || variantsParse.some(item => item.quantity === '')) {
         return res.status(400).json({
