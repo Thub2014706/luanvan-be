@@ -31,5 +31,6 @@ router.get('/list-by-theater', filmController.listFilmByTheater);
 router.get('/search', filmController.searchFilm);
 router.get('/filter', filmController.filterFilm);
 router.get('/number-ticket/:id', filmController.numberTicketFilm);
+router.delete('/delete/:id', filmController.deleteFilm);
 
 module.exports = router

@@ -1,4 +1,5 @@
 const { typeSeatEnum } = require("../constants")
+const OrderTicketModel = require("../models/OrderTicketModel")
 const RoomModel = require("../models/RoomModel")
 const SeatModel = require("../models/SeatModel")
 const ShowTimeModel = require("../models/ShowTimeModel")
@@ -60,11 +61,23 @@ const updateRoom = async (req, res) => {
         })
     }
     try {
-        const data = await RoomModel.findByIdAndUpdate(id, req.body, { new: true })
-
+        
         const promises = [];
         const seats = await SeatModel.find({room: id, $or: [{col: {$gt: numCol}}, {row: {$gt: numRow}}]})
-        seats.map(async item => await SeatModel.findByIdAndDelete(item._id))
+        // if (seats.map())
+        for (const item of seats) {
+            const existing = await OrderTicketModel.findOne({ seat: { $in: [item._id] } });
+            // console.log(existing);
+            
+            if (existing) {
+                return res.status(400).json({
+                    message: 'Không thể giảm hàng hoặc cột vì ràng buộc khóa ngoại với các dữ liệu liên quan.'
+                });
+            }
+        }
+        
+        const data = await RoomModel.findByIdAndUpdate(id, req.body, { new: true })
+        await Promise.all(seats.map(item => SeatModel.findByIdAndDelete(item._id)));
         for (let i = 1; i <= numRow; i++) {
             for (let j = 1; j <= numCol; j++) {
                 if (!(await SeatModel.findOne({row: i, col: j, room: id}))) {

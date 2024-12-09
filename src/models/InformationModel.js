@@ -7,7 +7,7 @@ const InformationSchema = new mongoose.Schema({
     email: { type: String, required: true },
     facebook: { type: String, required: true },
     instagram: { type: String, required: true },
-    titok: { type: String, required: true },
+    tiktok: { type: String, required: true },
     youtube: { type: String, required: true },
     timeStart: { type: String, required: true },
     timeEnd: { type: String, required: true },

@@ -250,7 +250,7 @@ const searchFilm = async (req, res) => {
         
         const allFilm = await FilmModel.find({status: true})
         const allFilmSchedule = await Promise.all(allFilm.map(async item => {
-            const test = await ScheduleModel.findOne({film: item._id, $or: [{type: typeSchedule[1]}, {type: typeSchedule[2]}]})
+            const test = await ScheduleModel.findOne({film: item._id, $or: [{type: typeSchedule[1]}, {type: typeSchedule[2]}], isDelete: false})
             return test ? item : null
         }))
         const filmFinal = allFilmSchedule.filter(item => item !== null)
@@ -371,6 +371,33 @@ const numberTicketFilm = async (req, res) => {
     }
 }
 
+const deleteFilm = async (req, res) => {
+    const id = req.params.id
+    try {
+        // await FilmModel.updateMany({ genre: { $in: [id] } }, { $pull: { genre: id } }, {new: true})
+
+        // await GenreModel.findOneAndDelete({_id: id})
+
+        const existing = await ScheduleModel.findOne({ film: id, isDelete: false  })
+        if (existing) {
+            res.status(400).json({
+                message: 'Không thể xóa phim vì ràng buộc khóa ngoại với các dữ liệu liên quan.'
+            })
+        } else {
+            await FilmModel.findOneAndDelete({_id: id})
+            res.status(200).json({
+                message: 'Xóa thành công'
+            })
+        }
+    } catch (error) {
+        console.log(error);
+        
+        res.status(500).json({
+            message: "Đã có lỗi xảy ra",
+        })
+    }
+}
+
 module.exports = {
     addFilm,
     getImage,
@@ -384,5 +411,6 @@ module.exports = {
     detailFilmBySchedule,
     searchFilm,
     filterFilm,
-    numberTicketFilm
+    numberTicketFilm,
+    deleteFilm
 }

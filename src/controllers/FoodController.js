@@ -120,7 +120,7 @@ const deleteFood = async (req, res) => {
         // res.status(200).json({
         //     message: 'Xóa thành công'
         // })
-        const existingCombo = await ComboModel.findOne({ "variants.food": id })
+        const existingCombo = await ComboModel.findOne({ "variants.food": id, isDelete: false })
         const existingOrderCombo = await OrderComboModel.findOne({combo: { $elemMatch: { id } }})
         const existingOrderTicket = await OrderTicketModel.findOne({combo: { $elemMatch: { id } }})
         if (existingCombo || existingOrderCombo || existingOrderTicket) {
