@@ -555,7 +555,7 @@ const filmRevenue = async (req, res) => {
 const theaterRevenue = async (req, res) => {
     const {theater} = req.query
     try {
-        const theatersFirst = await TheaterModel.find({})
+        const theatersFirst = await TheaterModel.find({isDelete: false})
         const theaters = theatersFirst.filter(item => {
             return item.name
             .toString()
@@ -607,7 +607,7 @@ const theaterRevenue = async (req, res) => {
 const theaterComboRevenue = async (req, res) => {
     const {theater} = req.query
     try {
-        const theatersFirst = await TheaterModel.find({})
+        const theatersFirst = await TheaterModel.find({isDelete: false})
         const theaters = theatersFirst.filter(item => {
             return item.name
             .toString()

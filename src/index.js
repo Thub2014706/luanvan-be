@@ -18,7 +18,7 @@ dotenv.config();
 
 const io = new Server(server, {
   cors: {
-      origin: ['http://localhost:3000', 'http://localhost:3002', 'exp://10.2.51.53:8081', 'http://10.2.51.53:8081'],
+      origin: ['http://localhost:3000', 'http://localhost:3002', 'exp://10.13.128.56:8081', 'http://10.13.128.56:8081'],
       credentials: true
   }
 })
@@ -180,7 +180,7 @@ mongoose.connect(process.env.DB_CONNECTION_STRING)
 .then(() => console.log('Connected!'))
 .catch((error) => console.error('Connection error:', error));
 
-app.use(cors({credentials: true, origin: ['http://localhost:3000', 'http://localhost:3002', 'exp://10.2.51.53:8081', 'http://10.2.51.53:8081'],}));
+app.use(cors({credentials: true, origin: ['http://localhost:3000', 'http://localhost:3002', 'exp://10.13.128.56:8081', 'http://10.13.128.56:8081'],}));
 
 app.use(cookieParser())
 app.use(express.urlencoded({ extended: false }));
